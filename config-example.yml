@@ -1,0 +1,20 @@
+# Nyantter config file
+
+# Database setting
+database:
+  host: localhost
+  port: 5432
+
+  name: nyantter
+
+  # Auth
+  user: theExampleUserLOL
+  pass: password123456LOL
+
+  prefix: ""
+
+# ActivityPub federation functionality will be provided in the future
+activitypub:
+  # The url of nyantter server
+  # Do not change this value if you have published the Nyantter server at least once.
+  url: https://example.com/

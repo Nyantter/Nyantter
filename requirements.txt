@@ -1,0 +1,4 @@
+FastAPI
+asyncpg
+aiohttp
+pyyaml
