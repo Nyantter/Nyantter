@@ -9,7 +9,7 @@ router = APIRouter()
     "/api/users/count",
     summary="総ユーザー数を確認します。"
 )
-async def apiIndex():
+async def usersCount():
     """
     総ユーザー数を確認します。
     """

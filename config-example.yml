@@ -1,5 +1,25 @@
 # Nyantter config file
 
+# account registration setting
+register:
+  # Whether to activate registration or not.
+  enableRegister: true
+
+  # Whether or not authentication by e-mail address is required at registration.
+  emailRequired: true
+
+  # hcaptcha / turnstile / null
+  # reCAPTCHA is not an option. reCAPTCHA has security risks.
+  authtype: turnstile
+
+# mail sender setting
+mail:
+  host: smtp.example.com
+  port: 587
+  username: nyantter@example.com
+  password: HatsuneMikuLOVELOVELOL
+  address: nyantter@example.com
+
 # Database setting
 database:
   host: localhost

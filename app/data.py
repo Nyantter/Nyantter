@@ -24,6 +24,7 @@ class DataHandler():
     config: dict = __config__
     database = config.get("database", {})
     mail = config.get("mail", {})
+    register = config.get("register", {})
 
     def getenv(name: str):
         return os.getenv(name)
