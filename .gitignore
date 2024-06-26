@@ -163,3 +163,4 @@ cython_debug/
 
 # Nyantter config file
 /config.yml
+/test_script

@@ -23,6 +23,7 @@ with open("config.yml") as f:
 class DataHandler():
     config: dict = __config__
     database = config.get("database", {})
+    mail = config.get("mail", {})
 
     def getenv(name: str):
         return os.getenv(name)
