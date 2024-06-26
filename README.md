@@ -8,9 +8,9 @@
 venvなんて知らん  
 まず、依存関係をインストールします。
 ```
-pip install -r requirement.txt
+pip install -r requirements.txt
 or
-python -m pip install -r requirement.txt
+python -m pip install -r requirements.txt
 ```
 ### Set up the config
 config.ymlをいじってください
