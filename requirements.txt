@@ -2,3 +2,4 @@ FastAPI
 asyncpg
 aiohttp
 pyyaml
+aiosmtplib
