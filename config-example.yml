@@ -1,5 +1,13 @@
 # Nyantter config file
 
+server:
+  name: Nyantter
+  description: Nyantter is a new SNS
+
+  # The url of nyantter server
+  # Do not change this value if you have published the Nyantter server at least once.
+  url: https://example.com/
+
 # account registration setting
 register:
   # Whether to activate registration or not.
@@ -14,6 +22,8 @@ register:
 
 # mail sender setting
 mail:
+  enableMail: true
+
   host: smtp.example.com
   port: 587
   username: nyantter@example.com
@@ -32,9 +42,3 @@ database:
   pass: password123456LOL
 
   prefix: ""
-
-# ActivityPub federation functionality will be provided in the future
-activitypub:
-  # The url of nyantter server
-  # Do not change this value if you have published the Nyantter server at least once.
-  url: https://example.com/

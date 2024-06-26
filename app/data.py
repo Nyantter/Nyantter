@@ -17,7 +17,7 @@ def path_constructor(loader, node):
 yaml.add_implicit_resolver('!path', path_matcher)
 yaml.add_constructor('!path', path_constructor)
 
-with open("config.yml") as f:
+with open("config.yml", "r", encoding='utf-8') as f:
     __config__ = yaml.load(f, Loader=yaml.FullLoader)
 
 class DataHandler():
@@ -25,6 +25,7 @@ class DataHandler():
     database = config.get("database", {})
     mail = config.get("mail", {})
     register = config.get("register", {})
+    server = config.get("server", {})
 
     def getenv(name: str):
         return os.getenv(name)

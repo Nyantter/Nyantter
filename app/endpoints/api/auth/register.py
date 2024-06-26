@@ -1,0 +1,118 @@
+# 作りかけ
+
+from ....data import DataHandler
+from ....sendmail import MailSender
+from ....snowflake import Snowflake
+
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi.responses import JSONResponse
+import asyncpg
+import asyncio
+
+import re
+from pydantic import BaseModel
+
+import bcrypt
+from typing import Optional
+
+import random, string
+from email.mime.text import MIMEText
+
+def random_chars(n):
+   randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
+   return ''.join(randlst)
+
+router = APIRouter()
+
+class RegisterUserData(BaseModel):
+    email: Optional[str] = None
+    handle: str
+    password: str
+    # captchaanswer: str 別の機会に実装
+
+async def deleteToken(token):
+    await asyncio.sleep(300)
+    conn: asyncpg.Connection = await asyncpg.connect(
+        host=DataHandler.database["host"],
+        port=DataHandler.database["port"],
+        user=DataHandler.database["user"],
+        password=DataHandler.database["pass"],
+        database=DataHandler.database["name"]
+    )
+
+    click = await conn.fetchval(f"""
+        SELECT EXISTS (SELECT * FROM {DataHandler.database['prefix']}emailcheck WHERE token = $1)
+    """, token)
+
+    if click:
+        await conn.execute(f"""
+            DELETE FROM {DataHandler.database['prefix']}emailcheck WHERE token = $1
+        """, token)
+    await conn.close()
+
+@router.post(
+    "/api/auth/register",
+    response_class=JSONResponse,
+)
+async def register(background_tasks: BackgroundTasks, user: RegisterUserData):
+    if re.match(r"[^\a-zA-Z0-9_]", user.handle):
+        raise HTTPException(status_code=400, detail="Username mustn't contain characters other than [a-zA-Z0-9_]")
+
+    salt = bcrypt.gensalt(rounds=10, prefix=b'2a')
+    user.password = bcrypt.hashpw(user.password.encode(), salt).decode()
+
+    conn: asyncpg.Connection = await asyncpg.connect(
+        host=DataHandler.database["host"],
+        port=DataHandler.database["port"],
+        user=DataHandler.database["user"],
+        password=DataHandler.database["pass"],
+        database=DataHandler.database["name"]
+    )
+
+    if DataHandler.register["emailRequired"]:
+        if user.email is None:
+            raise HTTPException(status_code=400, detail="Email field is required")
+
+        token = random_chars(30)
+
+        await conn.execute(f"""
+            INSERT INTO {DataHandler.database['prefix']}emailcheck
+            (token, email, handle, password)
+            VALUES($1, $2, $3, $4)
+        """, token, user.email, user.handle, user.password)
+        await conn.close()
+        
+        await MailSender.send(
+            subject="Registration application has been accepted.",
+            to=user.email,
+            attach=[
+                MIMEText(
+                    f"""
+                    <html>
+                        <body>
+                            <h1>Nyantter</h1>
+                            <p>To register with {DataHandler.server['name']}, click on the link below.</p><br>
+                            <a href="{DataHandler.server['url']}/email-auth/{token}">{DataHandler.server['url']}/email-auth/{token}</a><br>
+                            <p>If you do not remember registering, please ignore this email! Your registration will be canceled after 5 minutes!</p><br>
+                            <small>Nyantter</small>
+                        </body>
+                    </html>
+                    """,
+                    "html",
+                    "utf-8"
+                )
+            ]
+        )
+        background_tasks.add_task(deleteToken, token)
+        return {"detail": "Email has been sent; you must click within 5 minutes to validate your email address."}
+    else:
+        uniqueid = Snowflake.generate()
+
+        await conn.execute(f"""
+            INSERT INTO {DataHandler.database['prefix']}users
+            (id, email, handle, password)
+            VALUES($1, $2, $3, $4)
+        """, uniqueid, user.email, user.handle, user.password)
+
+        await conn.close()
+        return {"detail": "registed", "userid": f"{uniqueid}"}

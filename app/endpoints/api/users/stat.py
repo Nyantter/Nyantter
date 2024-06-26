@@ -1,12 +1,14 @@
 from ....data import DataHandler
 
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 import asyncpg
 
 router = APIRouter()
 
 @router.get(
     "/api/users/count",
+    response_class=JSONResponse,
     summary="総ユーザー数を確認します。"
 )
 async def usersCount():

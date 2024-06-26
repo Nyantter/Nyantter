@@ -2,9 +2,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import logging
 
-from app.endpoints.api import index
-from app.endpoints.api.users import stat
-from app.endpoints.api.nodeinfo import router as nodeinfo_router  # 追加
+from app.endpoints import emailauth
+
+from app.endpoints.api import index as APIIndex
+from app.endpoints.api.users import stat as UserStat
+from app.endpoints.api.auth import register
+from app.endpoints.wellknown.nodeinfo import router as nodeinfo_router  # 追加
 
 log = logging.getLogger("uvicorn")
 
@@ -16,6 +19,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(index.router)
-app.include_router(stat.router)
+app.include_router(emailauth.router)
+
+app.include_router(APIIndex.router)
+app.include_router(UserStat.router)
+app.include_router(register.router)
 app.include_router(nodeinfo_router)  # 追加

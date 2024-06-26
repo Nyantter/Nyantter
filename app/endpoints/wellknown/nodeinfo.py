@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
+from ...data import DataHandler
+
 router = APIRouter()
 
 nodeinfo_links = {
@@ -14,7 +16,7 @@ nodeinfo_2_0 = {
     "version": "2.0",
     "software": {
         "name": "nyantter",
-        "version": "0.1",
+        "version": "2024.06.26β",
         "repository": "https://github.com/Nyantter/Nyantter"
     },
     # 他の必要なフィールドを追加
@@ -24,13 +26,13 @@ nodeinfo_2_1 = {
     "version": "2.1",
     "software": {
         "name": "nyantter",
-        "version": "0.1",
+        "version": "2024.06.26β",
         "repository": "https://github.com/Nyantter/Nyantter"
     },
     # 他の必要なフィールドを追加
 }
 
-@router.get("/nodeinfo")
+@router.get("/.well-known/nodeinfo")
 async def get_nodeinfo():
     return JSONResponse(content=nodeinfo_links)
 

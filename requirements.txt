@@ -3,3 +3,5 @@ asyncpg
 aiohttp
 pyyaml
 aiosmtplib
+bcrypt
+snowflake-id

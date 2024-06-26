@@ -12,6 +12,7 @@ class Letter(BaseModel):
     content: Optional[str] = None
     replyed_to: Optional[int] = None
     relettered_to: Optional[int] = None
+    attachments: Optional[dict] = None
 
     async def getReplys(self) -> list["Letter"]:
         conn: asyncpg.Connection = await asyncpg.connect(

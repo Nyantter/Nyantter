@@ -19,7 +19,7 @@ def path_constructor(loader, node):
 yaml.add_implicit_resolver('!path', path_matcher)
 yaml.add_constructor('!path', path_constructor)
 
-with open("config.yml") as f:
+with open("config.yml", "r", encoding='utf-8') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
 database = config["database"]
@@ -45,6 +45,8 @@ async def main():
                 password TEXT NOT NULL,
                 handle VARCHAR(14) NOT NULL UNIQUE,
                 display_name VARCHAR(16),
+                icon_url TEXT,
+                header_url TEXT,
                 description VARCHAR(500),
                 info JSON
             )
@@ -57,7 +59,8 @@ async def main():
                 user_id BIGINT NOT NULL,
                 replyed_to BIGINT,
                 relettered_to BIGINT,
-                content VARCHAR(4000)
+                content VARCHAR(4000),
+                attachments JSON
             )
         ''')
 
@@ -76,6 +79,16 @@ async def main():
                 created_at TIMESTAMP DEFAULT now(),
                 permission TEXT NOT NULL,
                 user_id BIGINT NOT NULL
+            )
+        ''')
+
+        await conn.execute(f'''
+            CREATE TABLE IF NOT EXISTS {prefix}emailcheck (
+                token TEXT NOT NULL PRIMARY KEY UNIQUE,
+                created_at TIMESTAMP DEFAULT now(),
+                email TEXT NOT NULL,
+                handle TEXT NOT NULL,
+                password TEXT NOT NULL
             )
         ''')
 
