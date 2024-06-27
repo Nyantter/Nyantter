@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登録</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .form-group span {
+            color: red;
+            display: none;
+        }
+        .form-group input:invalid + span {
+            display: block;
+        }
+        .form-group .password-strength {
+            display: block;
+            margin-top: 5px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>登録</h2>
+        <form id="register-form">
+            <div class="form-group">
+                <label for="email">メールアドレス:</label>
+                <input type="email" id="email" name="email" required>
+                <span>有効なメールアドレスを入力してください。</span>
+            </div>
+            <div class="form-group">
+                <label for="handle">ユーザー名:</label>
+                <input type="text" id="handle" name="handle" required>
+                <span>ユーザー名を入力してください。</span>
+            </div>
+            <div class="form-group">
+                <label for="password">パスワード:</label>
+                <input type="password" id="password" name="password" required>
+                <span id="password-strength" class="password-strength">パスワードが弱すぎます。</span>
+            </div>
+            <button type="submit" class="submit-btn">登録</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthText = document.getElementById('password-strength');
+            const isValid = checkPasswordStrength(password);
+
+            strengthText.style.display = isValid ? 'none' : 'block';
+        });
+
+        function checkPasswordStrength(password) {
+            const minLength = 8;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumbers = /\d/.test(password);
+            const hasNonalphas = /\W/.test(password);
+
+            return password.length >= minLength && hasUpperCase && hasLowerCase && hasNumbers && hasNonalphas;
+        }
+
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                email: formData.get('email'),
+                handle: formData.get('handle'),
+                password: formData.get('password')
+            };
+
+            fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/api/auth/register';
+                } else {
+                    alert('登録に失敗しました。もう一度お試しください。');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('エラーが発生しました。もう一度お試しください。');
+            });
+        });
+    </script>
+</body>
+</html>
