@@ -31,7 +31,6 @@ class RegisterUserData(BaseModel):
     # captchaanswer: str 別の機会に実装
 
 async def deleteToken(token):
-    await asyncio.sleep(300)
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
         port=DataHandler.database["port"],
@@ -39,6 +38,14 @@ async def deleteToken(token):
         password=DataHandler.database["pass"],
         database=DataHandler.database["name"]
     )
+    for _ in range(300):
+        click = await conn.fetchval(f"""
+            SELECT EXISTS (SELECT * FROM {DataHandler.database['prefix']}emailcheck WHERE token = $1)
+        """, token)
+        if not click:
+            await conn.close()
+            return
+        await asyncio.sleep(1)
 
     click = await conn.fetchval(f"""
         SELECT EXISTS (SELECT * FROM {DataHandler.database['prefix']}emailcheck WHERE token = $1)
@@ -57,6 +64,12 @@ async def deleteToken(token):
 async def register(background_tasks: BackgroundTasks, user: RegisterUserData):
     if re.match(r"[^\a-zA-Z0-9_]", user.handle):
         raise HTTPException(status_code=400, detail="Username mustn't contain characters other than [a-zA-Z0-9_]")
+
+    if (user.password is None) or (user.password == ""):
+        raise HTTPException(status_code=400, detail="Password mustn't be null")
+
+    if (DataHandler.register["emailRequired"]) and ((user.email is None) or (user.email == "")):
+        raise HTTPException(status_code=400, detail="Email mustn't be null")
 
     salt = bcrypt.gensalt(rounds=10, prefix=b'2a')
     user.password = bcrypt.hashpw(user.password.encode(), salt).decode()
@@ -107,6 +120,7 @@ async def register(background_tasks: BackgroundTasks, user: RegisterUserData):
         return {"detail": "Email has been sent; you must click within 5 minutes to validate your email address."}
     else:
         uniqueid = Snowflake.generate()
+        token = random_chars(30)
 
         await conn.execute(f"""
             INSERT INTO {DataHandler.database['prefix']}users
@@ -114,5 +128,10 @@ async def register(background_tasks: BackgroundTasks, user: RegisterUserData):
             VALUES($1, $2, $3, $4)
         """, uniqueid, user.email, user.handle, user.password)
 
+        await conn.execute(f"""
+            INSERT INTO {DataHandler.database['prefix']}tokens
+            (token, permission, user_id)
+            VALUES($1, $2, $3)
+        """, token, "all", uniqueid)
         await conn.close()
-        return {"detail": "registed", "userid": f"{uniqueid}"}
+        return {"detail": "registed", "user_id": f"{uniqueid}", "token": token}

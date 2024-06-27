@@ -40,22 +40,36 @@ async def main():
         await conn.execute(f'''
             CREATE TABLE IF NOT EXISTS {prefix}users (
                 id BIGINT NOT NULL PRIMARY KEY UNIQUE,
-                created_at TIMESTAMP DEFAULT now(),
-                email VARCHAR(320) NOT NULL UNIQUE,
-                password TEXT NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+                domain VARCHAR(253),
+                email VARCHAR(320) UNIQUE,
+                password TEXT,
                 handle VARCHAR(14) NOT NULL UNIQUE,
                 display_name VARCHAR(16),
                 icon_url TEXT,
                 header_url TEXT,
                 description VARCHAR(500),
-                info JSON
+                info JSON,
+                public_key TEXT
+            )
+        ''')
+
+        await conn.execute(f'''
+            CREATE TABLE IF NOT EXISTS {prefix}roles (
+                id BIGINT NOT NULL PRIMARY KEY UNIQUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+                users JSON,
+                permissions JSON,
+                color VARCHAR(6),
+                icon_url TEXT,
+                minimum_icon_url TEXT
             )
         ''')
 
         await conn.execute(f'''
             CREATE TABLE IF NOT EXISTS {prefix}letters (
                 id BIGINT NOT NULL PRIMARY KEY UNIQUE,
-                created_at TIMESTAMP DEFAULT now(),
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
                 user_id BIGINT NOT NULL,
                 replyed_to BIGINT,
                 relettered_to BIGINT,
@@ -76,7 +90,7 @@ async def main():
         await conn.execute(f'''
             CREATE TABLE IF NOT EXISTS {prefix}tokens (
                 token TEXT NOT NULL PRIMARY KEY UNIQUE,
-                created_at TIMESTAMP DEFAULT now(),
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
                 permission TEXT NOT NULL,
                 user_id BIGINT NOT NULL
             )
@@ -85,7 +99,7 @@ async def main():
         await conn.execute(f'''
             CREATE TABLE IF NOT EXISTS {prefix}emailcheck (
                 token TEXT NOT NULL PRIMARY KEY UNIQUE,
-                created_at TIMESTAMP DEFAULT now(),
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
                 email TEXT NOT NULL,
                 handle TEXT NOT NULL,
                 password TEXT NOT NULL
