@@ -49,6 +49,21 @@
             width: 100%;
             text-align: center;
         }
+        .user-icon{
+            width: 48px;
+            height: 48px;
+
+            border: solid 0px;
+            border-radius: 50%;
+        }
+        .user-displayname {
+            padding-left: 4px;
+        }
+        .user-handle{
+            padding-left: 6px;
+            font-size: 80%;
+            color: #343434;
+        }
     </style>
 </head>
 <body>
@@ -68,7 +83,7 @@
         // トークンが存在しない場合、ログインページにリダイレクト
         const token = getCookie('token');
         if (!token) {
-            window.location.href = 'login.html';
+            window.location.href = 'login';
         }
 
         let page = 0;
@@ -82,7 +97,7 @@
                     data.letters.forEach(letter => {
                         const card = document.createElement('div');
                         card.className = 'card';
-                        card.innerHTML = `<h3>ユーザーID: ${letter.user_id}</h3><p>${letter.content}</p>`;
+                        card.innerHTML = `<h3><div style="display: flex;"><img src="${letter.user["icon_url"]}" class="user-icon"></img><div><div class="user-displayname">${letter.user["display_name"] ?? letter.user["handle"]}</div><div class="user-handle">@${letter.user["handle"]}</div></div></div></h3><p>${letter.content}</p>`;
                         postsContainer.appendChild(card);
                     });
                     page++;

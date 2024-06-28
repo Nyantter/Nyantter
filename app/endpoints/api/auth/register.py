@@ -18,6 +18,8 @@ from typing import Optional
 import random, string
 from email.mime.text import MIMEText
 
+import rsa
+
 def random_chars(n):
    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
    return ''.join(randlst)
@@ -122,11 +124,13 @@ async def register(background_tasks: BackgroundTasks, user: RegisterUserData):
         uniqueid = Snowflake.generate()
         token = random_chars(30)
 
+        publicKey, privateKey = rsa.newkeys(1024)
+
         await conn.execute(f"""
             INSERT INTO {DataHandler.database['prefix']}users
-            (id, email, handle, password)
-            VALUES($1, $2, $3, $4)
-        """, uniqueid, user.email, user.handle, user.password)
+            (id, email, handle, password, public_key, private_key)
+            VALUES($1, $2, $3, $4, $5, $6)
+        """, uniqueid, user.email, user.handle, user.password, publicKey.save_pkcs1().decode('utf8') , privateKey.save_pkcs1().decode('utf8') )
 
         await conn.execute(f"""
             INSERT INTO {DataHandler.database['prefix']}tokens

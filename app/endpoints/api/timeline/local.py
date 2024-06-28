@@ -11,7 +11,7 @@ router = APIRouter()
     response_class=JSONResponse,
     summary="ローカルタイムラインを取得します。"
 )
-async def localTimeLine(page = Query(default=0, ge=0)):
+async def localTimeLine(page: int = Query(default=0, ge=0)):
     """
     ローカルタイムラインを取得します。
     """
@@ -24,11 +24,17 @@ async def localTimeLine(page = Query(default=0, ge=0)):
     )
 
     prefix = DataHandler.database["prefix"]
-    _letters = list(await conn.fetch(f"SELECT * FROM {prefix}letters WHERE domain = NULL ORDER BY created_at DESC LIMIT 20 OFFSET $1", page*20))
+    _letters = list(await conn.fetch(f"SELECT * FROM {prefix}letters ORDER BY created_at DESC LIMIT 20 OFFSET $1", page*20))
 
     letters = []
     for letter in _letters:
+        user = dict(await conn.fetchrow(f"SELECT * FROM {prefix}users WHERE id = $1", letter["user_id"]))
+        if user.get("domain") is not None:
+            continue
+        del user["password"]
+        del user["private_key"]
         letter = dict(letter)
+        letter["user"] = user
         letter["id"] = str(letter["id"])
         letters.append(letter)
 

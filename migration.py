@@ -50,7 +50,8 @@ async def main():
                 header_url TEXT,
                 description VARCHAR(500),
                 info JSON,
-                public_key TEXT
+                public_key TEXT NOT NULL,
+                private_key TEXT NOT NULL
             )
         ''')
 
@@ -75,6 +76,13 @@ async def main():
                 relettered_to BIGINT,
                 content VARCHAR(4000),
                 attachments JSON
+            )
+        ''')
+
+        await conn.execute(f'''
+            CREATE TABLE IF NOT EXISTS {prefix}emojis (
+                id TEXT NOT NULL PRIMARY KEY UNIQUE,
+                image_url TEXT NOT NULL
             )
         ''')
 

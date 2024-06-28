@@ -35,20 +35,20 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Root endpoint setup
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    with open("static/timeline.html") as f:
+    with open("static/timeline.html", "r", encoding="utf8") as f:
         return HTMLResponse(f.read())
 
 @app.get("/timeline", response_class=HTMLResponse)
 async def timeline():
-    with open("static/timeline.html") as f:
+    with open("static/timeline.html", "r", encoding="utf8") as f:
         return HTMLResponse(f.read())
 
 @app.get("/login", response_class=HTMLResponse)
 async def login():
-    with open("static/login.html") as f:
+    with open("static/login.html", "r", encoding="utf8") as f:
         return HTMLResponse(f.read())
 
 @app.get("/register", response_class=HTMLResponse)
 async def register():
-    with open("static/register.html") as f:
+    with open("static/register.html", "r", encoding="utf8") as f:
         return HTMLResponse(f.read())

@@ -8,6 +8,8 @@ import asyncpg
 
 import random, string
 
+import rsa
+
 def random_chars(n):
    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
    return ''.join(randlst)
@@ -36,11 +38,13 @@ async def emailauth(token: str):
 
         uniqueid = Snowflake.generate()
 
+        publicKey, privateKey = rsa.newkeys(1024)
+
         await conn.execute(f"""
             INSERT INTO {DataHandler.database['prefix']}users
-            (id, email, handle, password)
-            VALUES($1, $2, $3, $4)
-        """, uniqueid, row["email"], row["handle"], row["password"])
+            (id, email, handle, password, public_key, private_key)
+            VALUES($1, $2, $3, $4, $5, $6)
+        """, uniqueid, row["email"], row["handle"], row["password"], publicKey.save_pkcs1().decode('utf8') , privateKey.save_pkcs1().decode('utf8') )
 
         token = random_chars(30)
 
