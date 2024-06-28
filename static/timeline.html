@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タイムライン</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+        .card h3 {
+            margin: 0 0 10px;
+        }
+        .card p {
+            margin: 0;
+        }
+        .load-more {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="timeline-container">
+        <h2>タイムライン</h2>
+        <div id="posts"></div>
+        <button class="load-more" id="load-more">もっと見る</button>
+    </div>
+    <script>
+        // クッキーからトークンを取得
+        function getCookie(name) {
+            let match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+            if (match) return match[2];
+            return null;
+        }
+
+        // トークンが存在しない場合、ログインページにリダイレクト
+        const token = getCookie('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        let page = 0;
+
+        // タイムラインの投稿を取得
+        function loadTimeline() {
+            fetch(`/api/timeline/local?page=${page}`)
+                .then(response => response.json())
+                .then(data => {
+                    const postsContainer = document.getElementById('posts');
+                    data.letters.forEach(letter => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `<h3>ユーザーID: ${letter.user_id}</h3><p>${letter.content}</p>`;
+                        postsContainer.appendChild(card);
+                    });
+                    page++;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        document.getElementById('load-more').addEventListener('click', loadTimeline);
+
+        // ページロード時にタイムラインを読み込む
+        window.onload = loadTimeline;
+    </script>
+</body>
+</html>
