@@ -64,7 +64,7 @@
             </div>
             <div class="form-group">
                 <label for="handle">ユーザー名:</label>
-                <input type="text" id="handle" name="handle" required>
+                <input type="text" id="handle" name="handle" pattern="[\a-zA-Z0-9_]" required>
                 <span>ユーザー名を入力してください。</span>
             </div>
             <div class="form-group">
@@ -81,6 +81,7 @@
             const strengthText = document.getElementById('password-strength');
             const isValid = checkPasswordStrength(password);
 
+            this.validaty.setCustomValidaty("パスワードが弱すぎます。")
             strengthText.style.display = isValid ? 'none' : 'block';
         });
 
@@ -112,17 +113,21 @@
                 body: JSON.stringify(data)
             })
             .then(response => {
-                if (response.ok) {
-                    window.location.href = '/api/auth/register';
-                } else {
-                    alert('登録に失敗しました。もう一度お試しください。');
-                }
+                response.json().then((data) => {
+                    if (response.ok && data.detail == "registed") {
+                        document.cookie = `token=${data.token}; path=/`;
+                        window.location.href = 'timeline';
+                    } else if (response.ok) {
+                        alert("登録を受け付けました。記入いただいたメールアドレス宛にメールを送信しましたので、そちらからメール認証を行ってください。\n※メールに記載されているURLの有効期限は5分です。");
+                    } else {
+                        alert('登録に失敗しました。もう一度お試しください。');
+                    }
+                });
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert('エラーが発生しました。もう一度お試しください。');
             });
-            return false;
         });
     </script>
 </body>
