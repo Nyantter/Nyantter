@@ -4,9 +4,9 @@ from pydantic import BaseModel
 import asyncpg
 from typing import Optional
 from datetime import datetime
-import uuid
 
 from ....data import DataHandler
+from ....snowflake import Snowflake  # 追加
 
 router = APIRouter()
 
@@ -58,7 +58,7 @@ async def create_letter(request: CreateLetterRequest, current_user: dict = Depen
         database=DataHandler.database["name"]
     )
 
-    letter_id = uuid.uuid4()
+    letter_id = Snowflake.generate()  # SnowflakeでIDを生成
     created_at = datetime.utcnow().isoformat()
 
     query = f"""
