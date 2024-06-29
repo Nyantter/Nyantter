@@ -3,7 +3,8 @@
 from ..data import DataHandler
 from ..snowflake import Snowflake
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
+from fastapi.responses import RedirectResponse
 import asyncpg
 
 import random, string
@@ -20,9 +21,10 @@ router = APIRouter()
 
 @router.get(
     "/email-auth/{token:str}",
+    response_class=RedirectResponse,
     include_in_schema=False
 )
-async def emailauth(token: str):
+async def emailauth(response: Response, token: str):
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
         port=DataHandler.database["port"],
@@ -72,7 +74,8 @@ async def emailauth(token: str):
         """, token, "all", uniqueid)
 
         await conn.close()
-        return {"detail": "registed", "user_id": f"{uniqueid}", "token": token}
+        response.set_cookie(key="token", value="token", path="/")
+        return RedirectResponse("/timeline")
     else:
         await conn.close()
         return {"detail": "invalid"}
