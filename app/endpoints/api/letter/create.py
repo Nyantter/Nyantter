@@ -6,7 +6,7 @@ from typing import Optional
 from datetime import datetime
 
 from ....data import DataHandler
-from ....snowflake import Snowflake  # 追加
+from ....snowflake import Snowflake
 
 router = APIRouter()
 
@@ -59,7 +59,7 @@ async def create_letter(request: CreateLetterRequest, current_user: dict = Depen
     )
 
     letter_id = Snowflake.generate()  # SnowflakeでIDを生成
-    created_at = datetime.utcnow().isoformat()
+    created_at = datetime.now()
 
     query = f"""
     INSERT INTO {DataHandler.database['prefix']}letters (id, created_at, content, replyed_to, relettered_to, attachments, user_id)
@@ -75,7 +75,7 @@ async def create_letter(request: CreateLetterRequest, current_user: dict = Depen
 
     letter = {
         "id": row["id"],
-        "created_at": row["created_at"],
+        "created_at": row["created_at"].isoformat(),  # ISO 8601形式の文字列に変換
         "content": row["content"],
         "replyed_to": row["replyed_to"],
         "relettered_to": row["relettered_to"],
