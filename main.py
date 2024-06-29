@@ -9,6 +9,7 @@ from app.endpoints.api import index as APIIndex
 from app.endpoints.api.users import stat as UserStat
 from app.endpoints.api.auth import register, login
 from app.endpoints.api.timeline import local
+from app.endpoints.api.letter.edit import router as edit_letter_router
 from app.endpoints.api.letter.create import router as create_letter_router  # 追加
 from app.endpoints.wellknown.nodeinfo import router as nodeinfo_router  # 追加
 
@@ -29,6 +30,7 @@ app.include_router(register.router)
 app.include_router(login.router)
 app.include_router(local.router)
 app.include_router(create_letter_router)  # 追加
+app.include_router(edit_letter_router)
 app.include_router(nodeinfo_router)  # 追加
 
 # Static files setup

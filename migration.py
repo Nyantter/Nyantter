@@ -71,6 +71,7 @@ async def main():
             CREATE TABLE IF NOT EXISTS {prefix}letters (
                 id BIGINT NOT NULL PRIMARY KEY UNIQUE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+                edited_at TIMESTAMP WITH TIME ZONE,
                 user_id BIGINT NOT NULL,
                 replyed_to BIGINT,
                 relettered_to BIGINT,

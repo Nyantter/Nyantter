@@ -64,6 +64,15 @@
             font-size: 80%;
             color: #343434;
         }
+        .card-content {
+            margin-left: 10px;
+            flex-grow: 1;
+        }
+        .created-at {
+            float: right;
+            font-size: 12px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -86,6 +95,32 @@
             window.location.href = 'login';
         }
 
+        function timeAgo(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+
+            // Define time intervals in seconds
+            const intervals = [
+                { label: '年', seconds: 31536000 },
+                { label: 'か月', seconds: 2592000 },
+                { label: '日', seconds: 86400 },
+                { label: '時間', seconds: 3600 },
+                { label: '分', seconds: 60 },
+                { label: '秒', seconds: 1 }
+            ];
+
+            // Calculate time ago
+            for (let i = 0; i < intervals.length; i++) {
+                const interval = intervals[i];
+                const delta = Math.floor(seconds / interval.seconds);
+                if (delta >= 1) {
+                    return `${delta} ${interval.label}前`;
+                }
+            }
+            return 'たった今';
+        }
+
         let page = 0;
 
         // タイムラインの投稿を取得
@@ -94,13 +129,31 @@
                 .then(response => response.json())
                 .then(data => {
                     const postsContainer = document.getElementById('posts');
-                    data.letters.forEach(letter => {
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        card.innerHTML = `<h3><div style="display: flex;"><img src="${letter.user["icon_url"]}" class="user-icon"></img><div><div class="user-displayname">${letter.user["display_name"] ?? letter.user["handle"]}</div><div class="user-handle">@${letter.user["handle"]}</div></div></div></h3><p>${letter.content}</p>`;
-                        postsContainer.appendChild(card);
-                    });
-                    page++;
+                    console.log(data.letters);
+                    if (data.letters.length > 0) {
+                        data.letters.forEach(letter => {
+                            const card = document.createElement('div');
+                            card.className = 'card';
+                            card.setAttribute('data-letterID', letter.id);
+                            card.innerHTML = `
+                                <h3>
+                                    <div style="display: flex;">
+                                        <img src="${letter.user.icon_url}" class="user-icon">
+                                        <div>
+                                            <div class="user-displayname">${letter.user.display_name ?? letter.user.handle}</div>
+                                            <div class="user-handle">${letter.user.handle}</div>
+                                        </div>
+                                    </div>
+                                </h3>
+                                <div class="card-content">
+                                    <p>${letter.content}</p>
+                                    <span class="created-at">${timeAgo(letter.created_at)}</span>
+                                </div>
+                            `;
+                            postsContainer.appendChild(card);
+                        });
+                        page++;
+                    }
                 })
                 .catch(error => console.error('Error:', error));
         }

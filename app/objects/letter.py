@@ -8,6 +8,7 @@ import asyncpg
 
 class Letter(BaseModel):
     id: int
+    user_id: int
     created_at: str
     content: Optional[str] = None
     replyed_to: Optional[int] = None

@@ -5,4 +5,4 @@ pyyaml
 aiosmtplib
 bcrypt
 snowflake-id
-rsa
+cryptography

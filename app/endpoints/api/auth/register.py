@@ -18,7 +18,9 @@ from typing import Optional
 import random, string
 from email.mime.text import MIMEText
 
-import rsa
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import default_backend
 
 def random_chars(n):
    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
@@ -136,13 +138,28 @@ async def register(background_tasks: BackgroundTasks, user: RegisterUserData):
         uniqueid = Snowflake.generate()
         token = random_chars(30)
 
-        publicKey, privateKey = rsa.newkeys(1024)
+        key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+            backend=default_backend()
+        )
+        privateKey = key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+
+        # 鍵をPEM形式でエクスポート（パブリックキー）
+        publicKey = key.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
 
         await conn.execute(f"""
             INSERT INTO {DataHandler.database['prefix']}users
             (id, email, handle, password, public_key, private_key)
             VALUES($1, $2, $3, $4, $5, $6)
-        """, uniqueid, user.email, user.handle, user.password, publicKey.save_pkcs1().decode('utf8') , privateKey.save_pkcs1().decode('utf8') )
+        """, uniqueid, user.email, user.handle, user.password, publicKey.decode('utf8') , privateKey.decode('utf8') )
 
         await conn.execute(f"""
             INSERT INTO {DataHandler.database['prefix']}tokens

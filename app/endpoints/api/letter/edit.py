@@ -10,10 +10,8 @@ from ....snowflake import Snowflake
 
 router = APIRouter()
 
-class CreateLetterRequest(BaseModel):
+class EditLetterRequest(BaseModel):
     content: str
-    replyed_to: Optional[int] = None
-    relettered_to: Optional[int] = None
     attachments: Optional[dict] = None
 
 async def get_current_user(authorization: str = Header(...)):
@@ -41,14 +39,14 @@ async def get_current_user(authorization: str = Header(...)):
     await conn.close()
     return dict(user)
 
-@router.post(
-    "/api/letter/create",
+@router.patch(
+    "/api/letter/{letter_id:int}/edit",
     response_class=JSONResponse,
-    summary="新しいレターを作成します。"
+    summary="レターを編集します。"
 )
-async def create_letter(request: CreateLetterRequest, current_user: dict = Depends(get_current_user)):
+async def create_letter(request: EditLetterRequest, letter_id: int, current_user: dict = Depends(get_current_user)):
     """
-    新しいレターを作成します。
+    レターを編集します。
     """
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
@@ -58,20 +56,27 @@ async def create_letter(request: CreateLetterRequest, current_user: dict = Depen
         database=DataHandler.database["name"]
     )
 
-    letter_id = Snowflake.generate()  # SnowflakeでIDを生成
-    created_at = datetime.now()
+    chkLetter = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}letters WHERE id = $1", letter_id)
+
+    if not chkLetter:
+        raise HTTPException(status_code=404, detail="Letter not found")
+    elif chkLetter["user_id"] != current_user["id"]:
+        raise HTTPException(status_code=400, detail="That letter is not yours")      
+
+    edited_at = datetime.now()
 
     query = f"""
-    INSERT INTO {DataHandler.database['prefix']}letters (id, created_at, content, replyed_to, relettered_to, attachments, user_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
-    RETURNING id, created_at, edited_at, content, replyed_to, relettered_to, attachments
+        UPDATE {DataHandler.database['prefix']}letters
+        SET content = $1, attachments = $2, edited_at = $3
+        WHERE id = $4 AND user_id = $5
+        RETURNING id, created_at, edited_at, content, replyed_to, relettered_to, attachments
     """
 
-    row = await conn.fetchrow(query, letter_id, created_at, request.content, request.replyed_to, request.relettered_to, request.attachments, current_user['id'])
+    row = await conn.fetchrow(query, request.content, request.attachments, edited_at, letter_id, current_user['id'])
 
     if not row:
         await conn.close()
-        raise HTTPException(status_code=500, detail="Failed to create letter")
+        raise HTTPException(status_code=500, detail="Failed to edit letter")
 
     letter = {
         "id": row["id"],

@@ -31,6 +31,7 @@ async def localTimeLine(page: int = Query(default=0, ge=0)):
         user = dict(await conn.fetchrow(f"SELECT * FROM {prefix}users WHERE id = $1", letter["user_id"]))
         if user.get("domain") is not None:
             continue
+        del user["email"]
         del user["password"]
         del user["private_key"]
         letter = dict(letter)
