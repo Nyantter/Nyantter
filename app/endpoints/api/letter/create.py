@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import asyncpg
 from typing import Optional
+from datetime import datetime
+import uuid
 
 from ....data import DataHandler
 
@@ -56,13 +58,16 @@ async def create_letter(request: CreateLetterRequest, current_user: dict = Depen
         database=DataHandler.database["name"]
     )
 
+    letter_id = uuid.uuid4()
+    created_at = datetime.utcnow().isoformat()
+
     query = f"""
-    INSERT INTO {DataHandler.database['prefix']}letters (created_at, content, replyed_to, relettered_to, attachments, user_id)
-    VALUES (NOW(), $1, $2, $3, $4, $5)
+    INSERT INTO {DataHandler.database['prefix']}letters (id, created_at, content, replyed_to, relettered_to, attachments, user_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
     RETURNING id, created_at, content, replyed_to, relettered_to, attachments
     """
 
-    row = await conn.fetchrow(query, request.content, request.replyed_to, request.relettered_to, request.attachments, current_user['id'])
+    row = await conn.fetchrow(query, letter_id, created_at, request.content, request.replyed_to, request.relettered_to, request.attachments, current_user['id'])
 
     if not row:
         await conn.close()
