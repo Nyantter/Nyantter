@@ -191,6 +191,7 @@
             fetch(`/api/timeline/local${query}`)
                 .then(response => response.json())
                 .then(data => {
+                    console.log(data);
                     const postsContainer = document.getElementById('posts');
                     if (data.letters.length > 0) {
                         data.letters.forEach(letter => {

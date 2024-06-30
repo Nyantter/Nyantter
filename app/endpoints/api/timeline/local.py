@@ -24,7 +24,7 @@ async def localTimeLine(page: int = Query(default=0, ge=0)):
     )
 
     prefix = DataHandler.database["prefix"]
-    _letters = list(await conn.fetch(f"SELECT * FROM {prefix}letters ORDER BY created_at DESC LIMIT 20 OFFSET $1", page*20))
+    _letters = list(await conn.fetch(f"SELECT * FROM {prefix}letters ORDER BY created_at ASC LIMIT 20 OFFSET $1", page*20))
 
     letters = []
     for letter in _letters:
