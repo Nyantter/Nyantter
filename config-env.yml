@@ -1,0 +1,40 @@
+# Nyantter config file
+
+server:
+  name: Nyantter
+  description: Nyantterは、Pythonで書かれたSNSらしいですよ。
+
+  # The url of nyantter server
+  # Do not change this value if you have published the Nyantter server at least once.
+  url: ${nyan_server_url}
+
+# account registration setting
+register:
+  # Whether to activate registration or not.
+  enableRegister: true
+
+  # Whether or not authentication by e-mail address is required at registration.
+  emailRequired: true
+
+# mail sender setting
+mail:
+  enableMail: true
+
+  host: ${nyan_mail_host}
+  port: 587
+  username: ${nyan_mail_username}
+  password: ${nyan_mail_password}
+  address: ${nyan_mail_address}
+
+# Database setting
+database:
+  host: ${nyan_db_host}
+  port: 5432
+
+  name: ${nyan_db_name}
+
+  # Auth
+  user: ${nyan_db_user}
+  pass: ${nyan_db_password}
+
+  prefix: ${nyan_db_prefix}
