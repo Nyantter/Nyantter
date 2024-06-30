@@ -57,6 +57,13 @@
             margin-left: 10px;
             flex-grow: 1;
         }
+        .card-reactions {
+            display: flex;
+        }
+        .reaction{
+            width: 24px;
+            height: 24px;
+        }
         .created-at {
             float: right;
             font-size: 12px;
@@ -196,6 +203,35 @@
                     if (data.letters.length > 0) {
                         data.letters.forEach(letter => {
                             if (!displayedPosts.has(letter.id)) {
+                                let reactionPanel = "";
+                                let reactionEmoji = {};
+
+                                letter.reactions.forEach(reaction => {
+                                    console.log(reaction);
+                                    if (!reactionEmoji.hasOwnProperty(reaction.reaction)) {
+                                        let ismine = false;
+
+                                        reactionEmoji[reaction.reaction] = {
+                                            data: reaction.reaction_data,
+                                            name: reaction.reaction,
+                                            ismine: ismine,
+                                            count: 0
+                                        };
+                                    }
+                                    reactionEmoji[reaction.reaction]["count"] += 1;
+                                    console.log(reactionEmoji[reaction.reaction]);
+                                });
+
+                                if (Object.keys(reactionEmoji).length > 0) {
+                                    Object.values(reactionEmoji).forEach(reaction_data => {
+                                        if (reaction_data.data.type == "custom") {
+                                            reactionPanel += `<button title="${reaction_data.name}"><img src="${reaction_data.data.image_url}" alt="${reaction_data.data.id}" class="reaction"></img> ${reaction_data.count}</button>`;
+                                        } else {
+                                            reactionPanel += `<button title="${reaction_data.name}">${reaction_data.data.emoji} ${reaction_data.count}</button>`;
+                                        }
+                                    });
+                                }
+
                                 const card = document.createElement('div');
                                 card.className = 'card';
                                 card.setAttribute('data-letterID', letter.id);
@@ -212,6 +248,7 @@
                                     <div class="card-content">
                                         <p>${letter.content}</p>
                                         <span class="created-at">${timeAgo(letter.created_at)}</span>
+                                        <div class="card-reactions">${reactionPanel}</div>
                                     </div>
                                 `;
                                 postsContainer.prepend(card);
@@ -222,6 +259,10 @@
                     }
                 })
                 .catch(error => console.error('Error:', error));
+        }
+
+        function put_reaction(letter_id, reaction){
+            console.log("未完成！！");
         }
 
         // 投稿フォームの表示と非表示の切り替え

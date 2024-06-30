@@ -42,7 +42,7 @@ async def letter(letter_id: int):
     reactions = []
     for _emoji in emojis:
         _emoji = dict(_emoji)
-        pattern = r'^\:([A-Za-z0-9]+)\:$'
+        pattern = r'^:([A-Za-z0-9_]+):$'
         match = re.match(pattern, _emoji["reaction"])
 
         if not isEmoji(_emoji["reaction"]) and match is not None:
@@ -52,7 +52,17 @@ async def letter(letter_id: int):
                 if chkEmoji:
                     _emoji["reaction_data"] = chkEmoji
                 else:
-                    _emoji["reaction_data"] = None
+                    _emoji = None
+            else:
+                _emoji["reaction_data"] = {
+                    "type": "normal",
+                    "emoji": emoji.emojize(f":{moji}:")
+                }
+        elif isEmoji(_emoji["reaction"]):
+            _emoji["reaction_data"] = {
+                "type": "normal",
+                "emoji": _emoji["reaction"],
+            }
         reactions.append(_emoji)
 
     letter = {

@@ -66,7 +66,7 @@ async def create_reaction(request: CreateReactionRequest, letter_id: int, curren
     if not chkLetter:
         raise HTTPException(status_code=404, detail="Letter not found")    
 
-    pattern = r'^\:([A-Za-z0-9]+)\:$'
+    pattern = r'^:([A-Za-z0-9_]+):$'
     match = re.match(pattern, request.reaction)
 
     if isEmoji(request.reaction):
