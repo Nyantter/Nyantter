@@ -62,12 +62,85 @@
             font-size: 12px;
             color: #888;
         }
+        .post-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .overlay.active {
+            display: flex;
+        }
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            resize: vertical;
+            height: 100px;
+        }
+        .submit-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container" id="timeline-container">
         <h2>タイムライン</h2>
         <div id="posts"></div>
+    </div>
+    <button class="post-btn" id="post-btn">+</button>
+    <div class="overlay" id="overlay">
+        <div class="form-container">
+            <h2>新しい投稿</h2>
+            <form id="post-form">
+                <div class="form-group">
+                    <label for="content">内容</label>
+                    <textarea id="content" name="content" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">投稿</button>
+            </form>
+        </div>
     </div>
     <script>
         // クッキーからトークンを取得
@@ -110,6 +183,7 @@
         }
 
         let latestTimestamp = null;
+        const displayedPosts = new Set();
 
         // 新しい投稿を取得
         function fetchNewPosts() {
@@ -121,31 +195,71 @@
                     console.log(data.letters);
                     if (data.letters.length > 0) {
                         data.letters.forEach(letter => {
-                            const card = document.createElement('div');
-                            card.className = 'card';
-                            card.setAttribute('data-letterID', letter.id);
-                            card.innerHTML = `
-                                <h3>
-                                    <div style="display: flex;">
-                                        <img src="${letter.user.icon_url}" class="user-icon">
-                                        <div>
-                                            <div class="user-displayname">${letter.user.display_name ?? letter.user.handle}</div>
-                                            <div class="user-handle">${letter.user.handle}</div>
+                            if (!displayedPosts.has(letter.id)) {
+                                const card = document.createElement('div');
+                                card.className = 'card';
+                                card.setAttribute('data-letterID', letter.id);
+                                card.innerHTML = `
+                                    <h3>
+                                        <div style="display: flex;">
+                                            <img src="${letter.user.icon_url}" class="user-icon">
+                                            <div>
+                                                <div class="user-displayname">${letter.user.display_name ?? letter.user.handle}</div>
+                                                <div class="user-handle">${letter.user.handle}</div>
+                                            </div>
                                         </div>
+                                    </h3>
+                                    <div class="card-content">
+                                        <p>${letter.content}</p>
+                                        <span class="created-at">${timeAgo(letter.created_at)}</span>
                                     </div>
-                                </h3>
-                                <div class="card-content">
-                                    <p>${letter.content}</p>
-                                    <span class="created-at">${timeAgo(letter.created_at)}</span>
-                                </div>
-                            `;
-                            postsContainer.prepend(card);
+                                `;
+                                postsContainer.prepend(card);
+                                displayedPosts.add(letter.id);
+                            }
                         });
                         latestTimestamp = data.letters[0].created_at;
                     }
                 })
                 .catch(error => console.error('Error:', error));
         }
+
+        // 投稿フォームの表示と非表示の切り替え
+        const postBtn = document.getElementById('post-btn');
+        const overlay = document.getElementById('overlay');
+
+        postBtn.addEventListener('click', () => {
+            overlay.classList.add('active');
+        });
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('active');
+            }
+        });
+
+        document.getElementById('post-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const content = document.getElementById('content').value;
+
+            const response = await fetch('/api/letter/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ content: content })
+            });
+
+            if (response.ok) {
+                document.getElementById('content').value = '';
+                overlay.classList.remove('active');
+                fetchNewPosts(); // 投稿後に新しい投稿を取得
+            } else {
+                alert('投稿に失敗しました');
+            }
+        });
 
         // ページロード時にタイムラインを読み込み、一定間隔で更新
         window.onload = () => {
