@@ -9,8 +9,12 @@ from .....data import DataHandler
 from .....snowflake import Snowflake
 
 import emoji
+import re
 
 router = APIRouter()
+
+def isEmoji(char: str):
+    return char in emoji.EMOJI_DATA
 
 class CreateReactionRequest(BaseModel):
     reaction: str
@@ -62,9 +66,23 @@ async def create_reaction(request: CreateReactionRequest, letter_id: int, curren
     if not chkLetter:
         raise HTTPException(status_code=404, detail="Letter not found")    
 
-    reaction = emoji.demojize(request.reaction)
-    if not ":" in reaction:
-        raise HTTPException(status_code=400, detail="Reaction not found")
+    pattern = r'^\:([A-Za-z0-9]+)\:$'
+    match = re.match(pattern, request.reaction)
+
+    if isEmoji(request.reaction):
+        reaction = emoji.demojize(request.reaction)
+    elif match is not None:
+        moji = match.group(1)
+        if isEmoji(emoji.emojize(f":{moji}:")):
+            reaction = f":{moji}:"
+        else:
+            chkEmoji = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}emojis WHERE id = $1", moji)
+            if chkEmoji:
+                reaction = f":{moji}:"
+            else:
+                raise HTTPException(status_code=400, detail="Reaction is not Emoji")
+    else:
+        raise HTTPException(status_code=400, detail="Reaction is not Emoji")
 
     reaction_id = Snowflake.generate()
 

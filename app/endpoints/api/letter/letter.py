@@ -8,7 +8,13 @@ from datetime import datetime
 from ....data import DataHandler
 from ....snowflake import Snowflake
 
+import emoji
+import re
+
 router = APIRouter()
+
+def isEmoji(char: str):
+    return char in emoji.EMOJI_DATA
 
 @router.get(
     "/api/letter/{letter_id:int}",
@@ -33,6 +39,22 @@ async def letter(letter_id: int):
     if not row:
         raise HTTPException(status_code=404, detail="Letter not found")  
 
+    reactions = []
+    for _emoji in emojis:
+        _emoji = dict(_emoji)
+        pattern = r'^\:([A-Za-z0-9]+)\:$'
+        match = re.match(pattern, _emoji["reaction"])
+
+        if not isEmoji(_emoji["reaction"]) and match is not None:
+            moji = match.group(1)
+            if not isEmoji(emoji.emojize(f":{moji}:")):
+                chkEmoji = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}emojis WHERE id = $1", moji)
+                if chkEmoji:
+                    _emoji["reaction_data"] = chkEmoji
+                else:
+                    _emoji["reaction_data"] = None
+        reactions.append(_emoji)
+
     letter = {
         "id": row["id"],
         "created_at": row["created_at"].isoformat(),  # ISO 8601形式の文字列に変換
@@ -41,7 +63,7 @@ async def letter(letter_id: int):
         "replyed_to": row["replyed_to"],
         "relettered_to": row["relettered_to"],
         "attachments": row["attachments"],
-        "emojis": emojis,
+        "emojis": reactions,
     }
 
     await conn.close()

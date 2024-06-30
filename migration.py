@@ -45,14 +45,15 @@ async def main():
                 domain VARCHAR(253),
                 email VARCHAR(320) UNIQUE,
                 password TEXT,
-                handle VARCHAR(14) NOT NULL UNIQUE,
+                handle VARCHAR(14) NOT NULL,
                 display_name VARCHAR(16),
                 icon_url TEXT,
                 header_url TEXT,
                 description VARCHAR(500),
                 info JSON,
                 public_key TEXT NOT NULL,
-                private_key TEXT NOT NULL
+                private_key TEXT NOT NULL,
+                CONSTRAINT unique_user UNIQUE (handle, domain)
             )
         ''')
 
@@ -93,13 +94,9 @@ async def main():
                 id BIGINT NOT NULL PRIMARY KEY UNIQUE,
                 letter_id BIGINT NOT NULL,
                 user_id BIGINT NOT NULL,
-                reaction TEXT NOT NULL
+                reaction TEXT NOT NULL,
+                CONSTRAINT unique_user_letter_reaction UNIQUE (user_id, letter_id)
             )
-        ''')
-
-        await conn.execute(f'''
-            ALTER TABLE {prefix}reactions
-            ADD CONSTRAINT unique_user_letter_reaction UNIQUE (user_id, letter_id);
         ''')
 
         await conn.execute(f'''
@@ -120,13 +117,6 @@ async def main():
                 password TEXT NOT NULL
             )
         ''')
-
-        # Add new columns or modify tables if necessary
-        await conn.execute(f'''
-            ALTER TABLE {prefix}letters
-            ADD COLUMN IF NOT EXISTS edited_at TIMESTAMP WITH TIME ZONE
-        ''')
-
         print("Database migration and update completed successfully.")
     except Exception as e:
         print(f"Error: {e}")
