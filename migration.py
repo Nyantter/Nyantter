@@ -10,11 +10,11 @@ if os.path.isfile(".env"):
 
 path_matcher = re.compile(r'\$\{([^}^{]+)\}')
 def path_constructor(loader, node):
-  ''' Extract the matched value, expand env variable, and replace the match '''
-  value = node.value
-  match = path_matcher.match(value)
-  env_var = match.group()[2:-1]
-  return os.environ.get(env_var) + value[match.end():]
+    ''' Extract the matched value, expand env variable, and replace the match '''
+    value = node.value
+    match = path_matcher.match(value)
+    env_var = match.group()[2:-1]
+    return os.environ.get(env_var) + value[match.end():]
 
 yaml.add_implicit_resolver('!path', path_matcher)
 yaml.add_constructor('!path', path_constructor)
@@ -26,7 +26,7 @@ database = config["database"]
 
 async def main():
     """
-    Migration the database.
+    Migrate and update the database.
     """
     conn: asyncpg.Connection = await asyncpg.connect(
         host=database["host"],
@@ -37,6 +37,7 @@ async def main():
     )
     prefix = database.get("prefix", "")
     try:
+        # Create tables if they do not exist
         await conn.execute(f'''
             CREATE TABLE IF NOT EXISTS {prefix}users (
                 id BIGINT NOT NULL PRIMARY KEY UNIQUE,
@@ -115,11 +116,17 @@ async def main():
             )
         ''')
 
-        print("ok.")
+        # Add new columns or modify tables if necessary
+        await conn.execute(f'''
+            ALTER TABLE {prefix}letters
+            ADD COLUMN IF NOT EXISTS edited_at TIMESTAMP WITH TIME ZONE
+        ''')
+
+        print("Database migration and update completed successfully.")
     except Exception as e:
         print(f"Error: {e}")
     finally:
-        # 接続を閉じる
+        # Close the connection
         await conn.close()
 
 asyncio.run(main())
