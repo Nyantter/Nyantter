@@ -192,7 +192,6 @@
                 .then(response => response.json())
                 .then(data => {
                     const postsContainer = document.getElementById('posts');
-                    console.log(data.letters);
                     if (data.letters.length > 0) {
                         data.letters.forEach(letter => {
                             if (!displayedPosts.has(letter.id)) {
