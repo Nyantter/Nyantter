@@ -39,27 +39,16 @@
         .card p {
             margin: 0;
         }
-        .load-more {
-            background-color: #28a745;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            text-align: center;
-        }
-        .user-icon{
+        .user-icon {
             width: 48px;
             height: 48px;
-
             border: solid 0px;
             border-radius: 50%;
         }
         .user-displayname {
             padding-left: 4px;
         }
-        .user-handle{
+        .user-handle {
             padding-left: 6px;
             font-size: 80%;
             color: #343434;
@@ -79,7 +68,6 @@
     <div class="container" id="timeline-container">
         <h2>タイムライン</h2>
         <div id="posts"></div>
-        <button class="load-more" id="load-more">もっと見る</button>
     </div>
     <script>
         // クッキーからトークンを取得
@@ -121,11 +109,12 @@
             return 'たった今';
         }
 
-        let page = 0;
+        let latestTimestamp = null;
 
-        // タイムラインの投稿を取得
-        function loadTimeline() {
-            fetch(`/api/timeline/local?page=${page}`)
+        // 新しい投稿を取得
+        function fetchNewPosts() {
+            const query = latestTimestamp ? `?since=${latestTimestamp}` : '';
+            fetch(`/api/timeline/local${query}`)
                 .then(response => response.json())
                 .then(data => {
                     const postsContainer = document.getElementById('posts');
@@ -150,18 +139,19 @@
                                     <span class="created-at">${timeAgo(letter.created_at)}</span>
                                 </div>
                             `;
-                            postsContainer.appendChild(card);
+                            postsContainer.prepend(card);
                         });
-                        page++;
+                        latestTimestamp = data.letters[0].created_at;
                     }
                 })
                 .catch(error => console.error('Error:', error));
         }
 
-        document.getElementById('load-more').addEventListener('click', loadTimeline);
-
-        // ページロード時にタイムラインを読み込む
-        window.onload = loadTimeline;
+        // ページロード時にタイムラインを読み込み、一定間隔で更新
+        window.onload = () => {
+            fetchNewPosts();
+            setInterval(fetchNewPosts, 30000);  // 30秒ごとに新しい投稿を取得
+        };
     </script>
 </body>
 </html>
