@@ -225,9 +225,9 @@
                                 if (Object.keys(reactionEmoji).length > 0) {
                                     Object.values(reactionEmoji).forEach(reaction_data => {
                                         if (reaction_data.data.type == "custom") {
-                                            reactionPanel += `<button title="${reaction_data.name}"><img src="${reaction_data.data.image_url}" alt="${reaction_data.data.id}" class="reaction"></img> ${reaction_data.count}</button>`;
+                                            reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}"><img src="${reaction_data.data.image_url}" alt="${reaction_data.data.id}" class="reaction"></img> ${reaction_data.count}</button>`;
                                         } else {
-                                            reactionPanel += `<button title="${reaction_data.name}">${reaction_data.data.emoji} ${reaction_data.count}</button>`;
+                                            reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}">${reaction_data.data.emoji} ${reaction_data.count}</button>`;
                                         }
                                     });
                                 }
@@ -262,51 +262,113 @@
         }
 
         function put_reaction(letter_id, reaction){
-            console.log("未完成！！");
-        }
-
-        // 投稿フォームの表示と非表示の切り替え
-        const postBtn = document.getElementById('post-btn');
-        const overlay = document.getElementById('overlay');
-
-        postBtn.addEventListener('click', () => {
-            overlay.classList.add('active');
-        });
-
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                overlay.classList.remove('active');
-            }
-        });
-
-        document.getElementById('post-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            const content = document.getElementById('content').value;
-
-            const response = await fetch('/api/letter/create', {
+            fetch(`/api/letter/${letter_id}/reaction/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ content: content })
+                body: JSON.stringify({ reaction })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('リアクション送信成功:', data);
+                update_reaction(letter_id, reaction, true);
+            })
+            .catch(error => {
+                console.error('リアクション送信エラー:', error);
+            });
+        }
+
+        function delete_reaction(letter_id, reaction){
+            fetch(`/api/letter/${letter_id}/reaction/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ reaction })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('リアクション削除成功:', data);
+                update_reaction(letter_id, reaction, false);
+            })
+            .catch(error => {
+                console.error('リアクション削除エラー:', error);
+            });
+        }
+
+        function update_reaction(letter_id, reaction, isAdd){
+            let reactionBtns = document.querySelectorAll(`[data-letter-id="${letter_id}"][data-reaction="${reaction}"]`);
+            console.log(reactionBtns);
+            reactionBtns.forEach(btn => {
+                if (isAdd) {
+                    btn.innerHTML = `<span style="color: red;">${btn.innerText.split(" ")[0]}</span> ${parseInt(btn.innerText.split(" ")[1])+1}`;
+                } else {
+                    btn.innerHTML = `${btn.innerText.split(" ")[0]} ${parseInt(btn.innerText.split(" ")[1])-1}`;
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 最初の投稿の読み込み
+            fetchNewPosts();
+
+            // 3秒ごとに新しい投稿をチェック
+            setInterval(fetchNewPosts, 3000);
+
+            // 投稿フォームの送信
+            const postForm = document.getElementById('post-form');
+            postForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const content = document.getElementById('content').value;
+                fetch('/api/letter/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('投稿成功:', data);
+                    document.getElementById('content').value = ''; // フォームをリセット
+                    document.getElementById('overlay').classList.remove('active'); // フォームを閉じる
+                })
+                .catch(error => {
+                    console.error('投稿エラー:', error);
+                });
             });
 
-            if (response.ok) {
-                document.getElementById('content').value = '';
-                overlay.classList.remove('active');
-                fetchNewPosts(); // 投稿後に新しい投稿を取得
-            } else {
-                alert('投稿に失敗しました');
-            }
-        });
+            // リアクションの追加と削除
+            document.addEventListener('click', function (event) {
+                if (event.target.classList.contains('reaction-btn')) {
+                    const letterId = event.target.getAttribute('data-letter-id');
+                    const reaction = event.target.getAttribute('data-reaction');
+                    const isAdd = event.target.querySelector('span') === null;
 
-        // ページロード時にタイムラインを読み込み、一定間隔で更新
-        window.onload = () => {
-            fetchNewPosts();
-            setInterval(fetchNewPosts, 30000);  // 30秒ごとに新しい投稿を取得
-        };
+                    if (isAdd) {
+                        put_reaction(letterId, reaction);
+                    } else {
+                        delete_reaction(letterId, reaction);
+                    }
+                }
+            });
+
+            // 投稿ボタンとオーバーレイの表示
+            const postBtn = document.getElementById('post-btn');
+            const overlay = document.getElementById('overlay');
+            postBtn.addEventListener('click', () => {
+                overlay.classList.add('active');
+            });
+            overlay.addEventListener('click', (event) => {
+                if (event.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
     </script>
 </body>
 </html>
