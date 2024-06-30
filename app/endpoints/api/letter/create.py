@@ -76,7 +76,7 @@ async def create_letter(request: CreateLetterRequest, current_user: dict = Depen
     letter = {
         "id": row["id"],
         "created_at": row["created_at"].isoformat(),  # ISO 8601形式の文字列に変換
-        "edited_at": row["edited_at"].isoformat() if row["edited_at"] is not None else None,
+        "edited_at": row["edited_at"].isoformat() if row["edited_at"] else None,
         "content": row["content"],
         "replyed_to": row["replyed_to"],
         "relettered_to": row["relettered_to"],

@@ -64,8 +64,3 @@ async def login():
 async def register():
     with open("static/register.html", "r", encoding="utf8") as f:
         return HTMLResponse(f.read())
-
-@app.get("/post", response_class=HTMLResponse, include_in_schema=False)
-async def register():
-    with open("static/post.html", "r", encoding="utf8") as f:
-        return HTMLResponse(f.read())
