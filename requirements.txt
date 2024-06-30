@@ -6,3 +6,4 @@ aiosmtplib
 bcrypt
 snowflake-id
 cryptography
+emoji

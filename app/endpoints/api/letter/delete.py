@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, Header
-from fastapi.responses import JSONResponse
+from fastapi.responses import Response
 from pydantic import BaseModel
 import asyncpg
 from typing import Optional
@@ -9,12 +9,6 @@ from ....data import DataHandler
 from ....snowflake import Snowflake
 
 router = APIRouter()
-
-class CreateLetterRequest(BaseModel):
-    content: str
-    replyed_to: Optional[int] = None
-    relettered_to: Optional[int] = None
-    attachments: Optional[dict] = None
 
 async def get_current_user(authorization: str = Header(...)):
     token = authorization.split(" ")[1]  # "Bearer <token>"
@@ -41,14 +35,14 @@ async def get_current_user(authorization: str = Header(...)):
     await conn.close()
     return dict(user)
 
-@router.post(
-    "/api/letter/create",
-    response_class=JSONResponse,
-    summary="新しいレターを作成します。"
+@router.delete(
+    "/api/letter/{letter_id:int}/delete",
+    response_class=Response,
+    summary="レターを削除します。"
 )
-async def create_letter(request: CreateLetterRequest, current_user: dict = Depends(get_current_user)):
+async def delete_letter(letter_id: int, current_user: dict = Depends(get_current_user)):
     """
-    新しいレターを作成します。
+    レターを削除します。
     """
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
@@ -58,30 +52,22 @@ async def create_letter(request: CreateLetterRequest, current_user: dict = Depen
         database=DataHandler.database["name"]
     )
 
-    letter_id = Snowflake.generate()  # SnowflakeでIDを生成
-    created_at = datetime.now()
+    chkLetter = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}letters WHERE id = $1", letter_id)
 
+    if not chkLetter:
+        raise HTTPException(status_code=404, detail="Letter not found")
+    elif chkLetter["user_id"] != current_user["id"]:
+        raise HTTPException(status_code=400, detail="That letter is not yours")      
     query = f"""
-    INSERT INTO {DataHandler.database['prefix']}letters (id, created_at, content, replyed_to, relettered_to, attachments, user_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
-    RETURNING id, created_at, edited_at, content, replyed_to, relettered_to, attachments
+        DELETE FROM {DataHandler.database['prefix']}letters
+        WHERE id = $1 AND user_id = $2
     """
 
-    row = await conn.fetchrow(query, letter_id, created_at, request.content, request.replyed_to, request.relettered_to, request.attachments, current_user['id'])
+    row = await conn.execute(query, letter_id, current_user['id'])
 
     if not row:
         await conn.close()
-        raise HTTPException(status_code=500, detail="Failed to create letter")
-
-    letter = {
-        "id": row["id"],
-        "created_at": row["created_at"].isoformat(),  # ISO 8601形式の文字列に変換
-        "edited_at": row["edited_at"].isoformat() if row["edited_at"] is not None else None,
-        "content": row["content"],
-        "replyed_to": row["replyed_to"],
-        "relettered_to": row["relettered_to"],
-        "attachments": row["attachments"]
-    }
+        raise HTTPException(status_code=500, detail="Failed to delete letter")
 
     await conn.close()
-    return letter
+    return None

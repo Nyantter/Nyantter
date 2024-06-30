@@ -35,8 +35,6 @@ async def login(user: LoginUserData):
 
     row = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle = $1", user.handle)
 
-    print(row)
-
     if row:
         if bcrypt.checkpw(user.password.encode(), row["password"].encode()):
             token = random_chars(30)

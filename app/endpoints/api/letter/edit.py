@@ -44,7 +44,7 @@ async def get_current_user(authorization: str = Header(...)):
     response_class=JSONResponse,
     summary="レターを編集します。"
 )
-async def create_letter(request: EditLetterRequest, letter_id: int, current_user: dict = Depends(get_current_user)):
+async def edit_lettter(request: EditLetterRequest, letter_id: int, current_user: dict = Depends(get_current_user)):
     """
     レターを編集します。
     """

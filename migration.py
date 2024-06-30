@@ -97,6 +97,11 @@ async def main():
         ''')
 
         await conn.execute(f'''
+            ALTER TABLE {prefix}reactions
+            ADD CONSTRAINT unique_user_letter_reaction UNIQUE (user_id, letter_id);
+        ''')
+
+        await conn.execute(f'''
             CREATE TABLE IF NOT EXISTS {prefix}tokens (
                 token TEXT NOT NULL PRIMARY KEY UNIQUE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
