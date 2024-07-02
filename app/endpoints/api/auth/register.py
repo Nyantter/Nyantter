@@ -4,7 +4,7 @@ from ....data import DataHandler
 from ....sendmail import MailSender
 from ....snowflake import Snowflake
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
 from fastapi.responses import JSONResponse
 import asyncpg
 import asyncio
@@ -77,7 +77,7 @@ async def deleteToken(token):
     "/api/auth/register",
     response_class=JSONResponse,
 )
-async def register(background_tasks: BackgroundTasks, user: RegisterUserData):
+async def register(request: Request, background_tasks: BackgroundTasks, user: RegisterUserData):
     if re.match(r"[^\a-zA-Z0-9_]", user.handle):
         raise HTTPException(status_code=400, detail="Username mustn't contain characters other than [a-zA-Z0-9_]")
 
