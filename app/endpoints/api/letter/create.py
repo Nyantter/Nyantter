@@ -8,6 +8,8 @@ from datetime import datetime
 from ....data import DataHandler
 from ....snowflake import Snowflake
 
+from ....ratelimiter import limiter
+
 router = APIRouter()
 
 class CreateLetterRequest(BaseModel):
@@ -41,6 +43,7 @@ async def get_current_user(authorization: str = Header(...)):
     await conn.close()
     return dict(user)
 
+@limiter.limit("30/minute")
 @router.post(
     "/api/letter/create",
     response_class=JSONResponse,
