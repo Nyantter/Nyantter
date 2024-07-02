@@ -17,14 +17,11 @@ from app.endpoints.api.letter.reaction.create import router as create_reaction_r
 from app.endpoints.api.letter.reaction.delete import router as delete_reaction_router  # 追加
 from app.endpoints.wellknown.nodeinfo import router as nodeinfo_router  # 追加
 
-from app.data import DataHandler
-
 log = logging.getLogger("uvicorn")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     log.info("Nyantter started.")
-    log.info("{DataHandler.config}")
     yield
     log.info("Nyantter is shutdowning...")
 
