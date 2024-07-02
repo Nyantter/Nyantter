@@ -22,6 +22,8 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 
+from ....ratelimiter import limiter
+
 def random_chars(n):
    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
    return ''.join(randlst)
@@ -70,6 +72,7 @@ async def deleteToken(token):
         """, token)
     await conn.close()
 
+@limiter.limit("1/hour")
 @router.post(
     "/api/auth/register",
     response_class=JSONResponse,
