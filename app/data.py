@@ -14,7 +14,6 @@ def path_constructor(loader, node):
     if match:
         env_var = match.group()[2:-1]
         env_value = os.environ.get(env_var)
-        print(f"Expanding {env_var} to {env_value}")  # デバッグ出力
         return env_value + value[match.end():]
     return value
 
@@ -34,6 +33,3 @@ class DataHandler():
     @staticmethod
     def getenv(name: str):
         return os.getenv(name)
-
-# デバッグ: 読み込んだ設定内容を表示
-print(DataHandler.config)
