@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi import APIRouter, HTTPException, Depends, Header, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import asyncpg
@@ -49,7 +49,7 @@ async def get_current_user(authorization: str = Header(...)):
     response_class=JSONResponse,
     summary="新しいレターを作成します。"
 )
-async def create_letter(request: CreateLetterRequest, current_user: dict = Depends(get_current_user)):
+async def create_letter(request: Request, letter: CreateLetterRequest, current_user: dict = Depends(get_current_user)):
     """
     新しいレターを作成します。
     """
@@ -70,7 +70,7 @@ async def create_letter(request: CreateLetterRequest, current_user: dict = Depen
     RETURNING id, created_at, edited_at, content, replyed_to, relettered_to, attachments
     """
 
-    row = await conn.fetchrow(query, letter_id, created_at, request.content, request.replyed_to, request.relettered_to, request.attachments, current_user['id'])
+    row = await conn.fetchrow(query, letter_id, created_at, letter.content, letter.replyed_to, letter.relettered_to, letter.attachments, current_user['id'])
 
     if not row:
         await conn.close()
