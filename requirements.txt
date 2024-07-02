@@ -7,3 +7,4 @@ bcrypt
 snowflake-id
 cryptography
 emoji
+slowapi
