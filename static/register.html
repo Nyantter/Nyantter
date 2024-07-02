@@ -80,9 +80,14 @@
             const password = this.value;
             const strengthText = document.getElementById('password-strength');
             const isValid = checkPasswordStrength(password);
-
-            this.validaty.setCustomValidaty("パスワードが弱すぎます。")
-            strengthText.style.display = isValid ? 'none' : 'block';
+        
+            if (isValid) {
+                this.setCustomValidity('');
+                strengthText.style.display = 'none';
+            } else {
+                this.setCustomValidity('パスワードが弱すぎます。');
+                strengthText.style.display = 'block';
+            }
         });
 
         function checkPasswordStrength(password) {
