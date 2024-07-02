@@ -8,11 +8,15 @@ if os.path.isfile(".env"):
 
 path_matcher = re.compile(r'\$\{([^}^{]+)\}')
 def path_constructor(loader, node):
-  ''' Extract the matched value, expand env variable, and replace the match '''
-  value = node.value
-  match = path_matcher.match(value)
-  env_var = match.group()[2:-1]
-  return os.environ.get(env_var) + value[match.end():]
+    ''' Extract the matched value, expand env variable, and replace the match '''
+    value = node.value
+    match = path_matcher.match(value)
+    if match:
+        env_var = match.group()[2:-1]
+        env_value = os.environ.get(env_var)
+        print(f"Expanding {env_var} to {env_value}")  # デバッグ出力
+        return env_value + value[match.end():]
+    return value
 
 yaml.add_implicit_resolver('!path', path_matcher)
 yaml.add_constructor('!path', path_constructor)
@@ -27,5 +31,9 @@ class DataHandler():
     register = config.get("register", {})
     server = config.get("server", {})
 
+    @staticmethod
     def getenv(name: str):
         return os.getenv(name)
+
+# デバッグ: 読み込んだ設定内容を表示
+print(DataHandler.config)
