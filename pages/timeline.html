@@ -238,7 +238,7 @@
                                 card.innerHTML = `
                                     <h3>
                                         <div style="display: flex;">
-                                            <img src="${letter.user.icon_url}" class="user-icon">
+                                            <img src="${letter.user.icon_url ?? "/static/images/default-icon.png"}" class="user-icon">
                                             <div>
                                                 <div class="user-displayname">${letter.user.display_name ?? letter.user.handle}</div>
                                                 <div class="user-handle">@${letter.user.handle}</div>
