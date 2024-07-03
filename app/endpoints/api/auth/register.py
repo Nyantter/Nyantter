@@ -24,6 +24,8 @@ from cryptography.hazmat.backends import default_backend
 
 from ....ratelimiter import limiter
 
+import logging
+
 def random_chars(n):
    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
    return ''.join(randlst)
@@ -80,6 +82,8 @@ async def register(request: Request, background_tasks: BackgroundTasks, user: Re
 
     salt = bcrypt.gensalt(rounds=10, prefix=b'2a')
     user.password = bcrypt.hashpw(user.password.encode(), salt).decode()
+
+   logging.getLogger("uvicorn").info(user)
 
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
