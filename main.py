@@ -17,10 +17,22 @@ from app.endpoints.api.letter.reaction.create import router as create_reaction_r
 from app.endpoints.api.letter.reaction.delete import router as delete_reaction_router  # 追加
 from app.endpoints.wellknown.nodeinfo import router as nodeinfo_router  # 追加
 
+import asyncpg
+from app.data import DataHandler
+
 log = logging.getLogger("uvicorn")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    conn: asyncpg.Connection = await asyncpg.connect(
+        host=DataHandler.database["host"],
+        port=DataHandler.database["port"],
+        user=DataHandler.database["user"],
+        password=DataHandler.database["pass"],
+        database=DataHandler.database["name"]
+    )
+
+    await conn.execute(f"DELETE FROM {DataHandler.database['prefix']}emailcheck WHERE created_at > NOW() + INTERVAL '5 minutes';")
     log.info("Nyantter started.")
     yield
     log.info("Nyantter is shutdowning...")
