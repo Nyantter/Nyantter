@@ -70,36 +70,12 @@
             <div class="form-group">
                 <label for="password">パスワード:</label>
                 <input type="password" id="password" name="password" required>
-                <span id="password-strength" class="password-strength">パスワードが弱すぎます。</span>
+                <span>パスワードを入力してください。</span>
             </div>
             <button type="submit" class="submit-btn">登録</button>
         </form>
     </div>
     <script>
-        document.getElementById('password').addEventListener('input', function() {
-            const password = this.value;
-            const strengthText = document.getElementById('password-strength');
-            const isValid = checkPasswordStrength(password);
-        
-            if (isValid) {
-                this.setCustomValidity('');
-                strengthText.style.display = 'none';
-            } else {
-                this.setCustomValidity('パスワードが弱すぎます。');
-                strengthText.style.display = 'block';
-            }
-        });
-
-        function checkPasswordStrength(password) {
-            const minLength = 8;
-            const hasUpperCase = /[A-Z]/.test(password);
-            const hasLowerCase = /[a-z]/.test(password);
-            const hasNumbers = /\d/.test(password);
-            const hasNonalphas = /\W/.test(password);
-
-            return password.length >= minLength && hasUpperCase && hasLowerCase && hasNumbers && hasNonalphas;
-        }
-
         document.getElementById('register-form').addEventListener('submit', function(event) {
             event.preventDefault();
             
