@@ -31,8 +31,8 @@ async def lifespan(app: FastAPI):
         password=DataHandler.database["pass"],
         database=DataHandler.database["name"]
     )
-
     await conn.execute(f"DELETE FROM {DataHandler.database['prefix']}emailcheck WHERE created_at > NOW() + INTERVAL '5 minutes';")
+    await conn.close()
     log.info("Nyantter started.")
     yield
     log.info("Nyantter is shutdowning...")
