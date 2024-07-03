@@ -28,15 +28,6 @@ def random_chars(n):
    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
    return ''.join(randlst)
 
-def check_password_strength(password):
-    min_length = 8
-    has_uppercase = any(c.isupper() for c in password)
-    has_lowercase = any(c.islower() for c in password)
-    has_numbers = any(c.isdigit() for c in password)
-    has_nonalphas = bool(re.search(r'\W', password))
-
-    return len(password) >= min_length and has_uppercase and has_lowercase and has_numbers and has_nonalphas
-
 router = APIRouter()
 
 class RegisterUserData(BaseModel):
@@ -83,9 +74,6 @@ async def register(request: Request, background_tasks: BackgroundTasks, user: Re
 
     if (user.password is None) or (user.password == ""):
         raise HTTPException(status_code=400, detail="Password mustn't be null")
-
-    if not check_password_strength(user.password):
-        raise HTTPException(status_code=400, detail="Weak password")
 
     if (DataHandler.register["emailRequired"]) and ((user.email is None) or (user.email == "")):
         raise HTTPException(status_code=400, detail="Email mustn't be null")
