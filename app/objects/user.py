@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from ..datetime import datetime
+from datetime import datetime
 
 class User(BaseModel):
     id: int
