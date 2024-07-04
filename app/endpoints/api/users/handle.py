@@ -1,0 +1,41 @@
+from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+import asyncpg
+from typing import Optional
+from datetime import datetime
+
+from ....data import DataHandler
+from ....snowflake import Snowflake
+
+from ....objects import User
+
+router = APIRouter()
+
+@router.get(
+    "/api/user/@{handle:str}",
+    response_class=JSONResponse,
+    summary="ユーザーハンドルからユーザーを取得します。"
+)
+async def getUserByHandle(handle: str):
+    """
+    ユーザーハンドルからユーザーを取得します。
+    Fediverseユーザーを取得するにはハンドルのあとに**@domain.tld**の形式で書きます。
+    """
+    conn: asyncpg.Connection = await asyncpg.connect(
+        host=DataHandler.database["host"],
+        port=DataHandler.database["port"],
+        user=DataHandler.database["user"],
+        password=DataHandler.database["pass"],
+        database=DataHandler.database["name"]
+    )
+
+    row = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}letters WHERE id = $1", letter_id)
+
+    if not row:
+        raise HTTPException(status_code=404, detail="User not found")  
+
+    user = User.from_obj(dict(row))
+
+    await conn.close()
+    return user
