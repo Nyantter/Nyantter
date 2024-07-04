@@ -25,8 +25,12 @@ async def usersCount():
 
     prefix = DataHandler.database["prefix"]
     users = await conn.fetchval(f"SELECT COUNT(*) FROM {prefix}users")
+    local = await conn.fetchval(f"SELECT COUNT(*) FROM {prefix}users WHERE domain = NULL")
+    fedi = await conn.fetchval(f"SELECT COUNT(*) FROM {prefix}users WHERE domain != NULL")
 
     await conn.close()
     return {
-        "users": users
+        "all": users,
+        "local": local,
+        "fediverse": fedi
     }
