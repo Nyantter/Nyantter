@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional
 import asyncpg
 
-from ..datetime import datetime
+from datetime import datetime
 
 class Letter(BaseModel):
     id: int
