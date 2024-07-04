@@ -54,7 +54,7 @@ async def getUserByHandle(handle: str):
     if not row:
         raise HTTPException(status_code=404, detail="User not found")  
 
-    user = User.from_obj(dict(row))
+    user = User.parse_obj(dict(row))
 
     await conn.close()
     return user
