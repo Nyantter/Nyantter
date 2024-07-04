@@ -30,7 +30,7 @@ async def getUserByHandle(handle: str):
         handle = splitedHandle[0]
         domain = splitedHandle[1]
     else:
-        raise HTTPException(status_code=400, detail="Only "@userHandle" or "@userHandle@domain.tld" handle format is accepted")
+        raise HTTPException(status_code=400, detail='Only "@userHandle" or "@userHandle@domain.tld" handle format is accepted')
 
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
