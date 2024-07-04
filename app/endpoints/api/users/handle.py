@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import asyncpg
@@ -52,9 +52,15 @@ async def getUserByHandle(handle: str):
         )
 
     if not row:
+        await conn.close()
         raise HTTPException(status_code=404, detail="User not found")  
 
+    # Parse row into User object
     user = User.parse_obj(dict(row))
+
+    # Convert created_at to ISO format if it's a datetime object
+    if isinstance(user.created_at, datetime):
+        user.created_at = user.created_at.isoformat()
 
     await conn.close()
     return user
