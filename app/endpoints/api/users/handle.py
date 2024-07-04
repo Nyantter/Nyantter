@@ -40,7 +40,16 @@ async def getUserByHandle(handle: str):
         database=DataHandler.database["name"]
     )
 
-    row = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle = $1 AND domain = $2", handle, domain)
+    if domain is None:
+        row = await conn.fetchrow(
+            f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle = $1 AND domain IS NULL",
+            handle
+        )
+    else:
+        row = await conn.fetchrow(
+            f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle = $1 AND domain = $2",
+            handle, domain
+        )
 
     if not row:
         raise HTTPException(status_code=404, detail="User not found")  
