@@ -6,10 +6,12 @@ from pydantic import BaseModel
 from typing import Optional
 import asyncpg
 
+from datetime import datetime
+
 class Letter(BaseModel):
     id: int
     user_id: int
-    created_at: str
+    created_at: datetime
     content: Optional[str] = None
     replyed_to: Optional[int] = None
     relettered_to: Optional[int] = None
