@@ -255,7 +255,7 @@
                                 displayedPosts.add(letter.id);
                             }
                         });
-                        latestTimestamp = data.letters[0].created_at;
+                        latestTimestamp = data.letters[0].created_at.replace("+", "%2B")
                     }
                 })
                 .catch(error => console.error('Error:', error));
