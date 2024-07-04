@@ -22,6 +22,16 @@ async def getUserByHandle(handle: str):
     ユーザーハンドルからユーザーを取得します。
     Fediverseユーザーを取得するにはハンドルのあとに**@domain.tld**の形式で書きます。
     """
+    
+    splitedHandle = handle.split("@")
+    if len(splitedHandle) <= 1:
+        domain = None
+    elif len(splitedHandle) == 2:
+        handle = splitedHandle[0]
+        domain = splitedHandle[1]
+    else:
+        raise HTTPException(status_code=400, detail="Only "@userHandle" or "@userHandle@domain.tld" handle format is accepted")
+
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
         port=DataHandler.database["port"],
