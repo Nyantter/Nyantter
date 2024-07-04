@@ -7,6 +7,8 @@ import asyncpg
 import emoji
 import re
 
+from datetime import datetime
+
 router = APIRouter()
 
 def isEmoji(char: str):
@@ -17,10 +19,16 @@ def isEmoji(char: str):
     response_class=JSONResponse,
     summary="ローカルタイムラインを取得します。"
 )
-async def localTimeLine(page: int = Query(default=0, ge=0)):
+async def localTimeLine(page: int = Query(default=0, ge=0), since:str = None):
     """
     ローカルタイムラインを取得します。
     """
+    
+    if since is None:
+        since = datetime(2000, 1, 1)
+    else:
+        since = datetime.strptime(since, '%Y-%m-%dT%H:%M:%S%z')
+    
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
         port=DataHandler.database["port"],
@@ -30,7 +38,7 @@ async def localTimeLine(page: int = Query(default=0, ge=0)):
     )
 
     prefix = DataHandler.database["prefix"]
-    _letters = list(await conn.fetch(f"SELECT * FROM {prefix}letters ORDER BY created_at DESC LIMIT 20 OFFSET $1", page*20))
+    _letters = list(await conn.fetch(f"SELECT * FROM {prefix}letters WHERE created_at = $1 ORDER BY created_at DESC LIMIT 20 OFFSET $2", since, page*20))
 
     letters = []
     for letter in _letters:
