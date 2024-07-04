@@ -38,7 +38,10 @@ async def lifespan(app: FastAPI):
     yield
     log.info("Nyantter is shutdowning...")
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    name="Nyantter",
+    lifespan=lifespan
+)
 
 app.include_router(emailauth.router)
 app.include_router(APIIndex.router)
