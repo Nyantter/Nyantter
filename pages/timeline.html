@@ -201,7 +201,7 @@
                     console.log(data);
                     const postsContainer = document.getElementById('posts');
                     if (data.letters.length > 0) {
-                        data.letters.forEach(letter => {
+                        data.letters.reverse().forEach(letter => {
                             if (!displayedPosts.has(letter.id)) {
                                 let reactionPanel = "";
                                 let reactionEmoji = {};
