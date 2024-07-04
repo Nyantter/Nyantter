@@ -75,11 +75,15 @@
             right: 20px;
             background-color: #28a745;
             color: white;
-            padding: 15px;
-            border-radius: 50%;
+            width: 60px; /* 同じ幅と高さに設定 */
+            height: 60px; /* 同じ幅と高さに設定 */
+            border-radius: 50%; /* 完全な丸にする */
             border: none;
             font-size: 24px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* 中央揃えにする */
         }
         .overlay {
             display: none;
@@ -118,6 +122,7 @@
             box-sizing: border-box;
             resize: vertical;
             height: 100px;
+            font-size: 200%;
         }
         .submit-btn {
             background-color: #28a745;
