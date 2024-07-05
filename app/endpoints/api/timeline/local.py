@@ -93,7 +93,7 @@ async def localTimeLine(
         reactions = []
         for _emoji in emojis:
             _emoji = dict(_emoji)
-            if _emoji.get("user_id", 1) == user_id:
+            if _emoji.get("user_id") == user_id:
                 _emoji["ismine"] = True
             else:
                 _emoji["ismine"] = False
