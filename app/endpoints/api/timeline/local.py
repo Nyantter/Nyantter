@@ -13,7 +13,7 @@ router = APIRouter()
 def isEmoji(char: str):
     return char in emoji.EMOJI_DATA
 
-async def get_current_user(authorization: Optional[str] = Header(None)):
+async def get_current_user(authorization: Optional[str] = Header(...)):
     if authorization is None:
         return {"id": 0}
 
@@ -51,7 +51,7 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
     summary="ローカルタイムラインを取得します。"
 )
 async def localTimeLine(
-    user: Depends(get_current_user),
+    user: dict = Depends(get_current_user),
     page: int = Query(default=0, ge=0),
     since: Optional[str] = None
 ):
