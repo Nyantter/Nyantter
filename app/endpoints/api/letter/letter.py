@@ -34,12 +34,12 @@ class DataHandler:
 
 async def get_current_user(authorization: Optional[str] = Header(None)):
     if authorization is None:
-        return None
+        return {}
 
     try:
         token = authorization.split(" ")[1]  # "Bearer <token>"
     except IndexError:
-        return None
+        return {}
 
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
@@ -53,14 +53,14 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
 
     if not user_id:
         await conn.close()
-        return None
+        return {}
 
     user = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", user_id)
 
     await conn.close()
 
     if not user:
-        return None
+        return {}
 
     return dict(user)
 
@@ -74,7 +74,7 @@ async def letter(letter_id: int, user: Depends(get_current_user)):
     レターの情報を取得します。
     """
     
-    if user is None:
+    if user is {}:
         user_id = None
     else:
         user_id = user.get("id", None)
