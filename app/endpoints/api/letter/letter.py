@@ -16,15 +16,69 @@ router = APIRouter()
 def isEmoji(char: str):
     return char in emoji.EMOJI_DATA
 
+from fastapi import FastAPI, Depends, Header, HTTPException
+import asyncpg
+from typing import Optional
+
+app = FastAPI()
+
+class DataHandler:
+    database = {
+        "host": "localhost",
+        "port": 5432,
+        "user": "user",
+        "pass": "password",
+        "name": "dbname",
+        "prefix": "myapp_"
+    }
+
+async def get_current_user(authorization: Optional[str] = Header(None)):
+    if authorization is None:
+        return None
+
+    try:
+        token = authorization.split(" ")[1]  # "Bearer <token>"
+    except IndexError:
+        return None
+
+    conn: asyncpg.Connection = await asyncpg.connect(
+        host=DataHandler.database["host"],
+        port=DataHandler.database["port"],
+        user=DataHandler.database["user"],
+        password=DataHandler.database["pass"],
+        database=DataHandler.database["name"]
+    )
+
+    user_id = await conn.fetchval(f"SELECT user_id FROM {DataHandler.database['prefix']}tokens WHERE token = $1", token)
+
+    if not user_id:
+        await conn.close()
+        return None
+
+    user = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", user_id)
+
+    await conn.close()
+
+    if not user:
+        return None
+
+    return dict(user)
+
 @router.get(
     "/api/letter/{letter_id:int}",
     response_class=JSONResponse,
     summary="レターの情報を取得します。"
 )
-async def letter(letter_id: int):
+async def letter(letter_id: int, user: Depends(get_current_user)):
     """
     レターの情報を取得します。
     """
+    
+    if user is None:
+        user_id = None
+    else:
+        user_id = user.get("id", None)
+    
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
         port=DataHandler.database["port"],
@@ -42,6 +96,12 @@ async def letter(letter_id: int):
     reactions = []
     for _emoji in emojis:
         _emoji = dict(_emoji)
+        
+        if _emoji.get("user_id", 0) == user_id:
+            _emoji["ismine"] = True
+        else:
+            _emoji["ismine"] = False
+        
         pattern = r'^:([A-Za-z0-9_]+):$'
         match = re.match(pattern, _emoji["reaction"])
 
