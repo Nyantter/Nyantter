@@ -16,7 +16,7 @@ router = APIRouter()
 def isEmoji(char: str):
     return char in emoji.EMOJI_DATA
 
-async def get_current_user(authorization: Optional[str] = Header(None)):
+async def get_current_user(authorization: Optional[str] = Header(...)):
     if authorization is None:
         return {"id": 0}
 
@@ -53,7 +53,7 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
     response_class=JSONResponse,
     summary="レターの情報を取得します。"
 )
-async def letter(letter_id: int, user: Depends(get_current_user)):
+async def letter(letter_id: int, user: dict = Depends(get_current_user)):
     """
     レターの情報を取得します。
     """
