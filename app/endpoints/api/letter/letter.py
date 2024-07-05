@@ -16,16 +16,6 @@ router = APIRouter()
 def isEmoji(char: str):
     return char in emoji.EMOJI_DATA
 
-class DataHandler:
-    database = {
-        "host": "localhost",
-        "port": 5432,
-        "user": "user",
-        "pass": "password",
-        "name": "dbname",
-        "prefix": "myapp_"
-    }
-
 async def get_current_user(authorization: Optional[str] = Header(None)):
     if authorization is None:
         return None
