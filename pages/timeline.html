@@ -162,10 +162,12 @@
             return null;
         }
 
-        // トークンが存在しない場合、ログインページにリダイレクト
+        // トークンが存在しない場合、投稿ボタンを隠す
         const token = getCookie('token');
+        let loggedIn = true;
         if (!token) {
-            window.location.href = 'login';
+            loggedIn = false;
+            document.getElementById("post-btn").style = "display: none;";
         }
 
         function timeAgo(timestamp) {
