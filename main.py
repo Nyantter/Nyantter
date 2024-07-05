@@ -22,6 +22,8 @@ from app.endpoints.api.letter.reaction.create import router as create_reaction_r
 from app.endpoints.api.letter.reaction.delete import router as delete_reaction_router
 from app.endpoints.wellknown.nodeinfo import router as nodeinfo_router
 
+from app.endpoints import frontend
+
 # Set up logging
 log = logging.getLogger("uvicorn")
 
@@ -64,26 +66,7 @@ app.include_router(create_reaction_router)
 app.include_router(delete_reaction_router)
 app.include_router(nodeinfo_router)
 
+app.include_router(frontend.router)
+
 # Static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# HTML response endpoints
-@app.api_route("/", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
-async def root():
-    async with aiofiles.open("pages/index.html", "r", encoding="utf8") as f:
-        return HTMLResponse(await f.read())
-
-@app.api_route("/timeline", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
-async def timeline():
-    async with aiofiles.open("pages/timeline.html", "r", encoding="utf8") as f:
-        return HTMLResponse(await f.read())
-
-@app.api_route("/login", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
-async def login():
-    async with aiofiles.open("pages/login.html", "r", encoding="utf8") as f:
-        return HTMLResponse(await f.read())
-
-@app.api_route("/register", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
-async def register():
-    async with aiofiles.open("pages/register.html", "r", encoding="utf8") as f:
-        return HTMLResponse(await f.read())
