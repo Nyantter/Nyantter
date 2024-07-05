@@ -1,14 +1,9 @@
-from ....data import DataHandler
-
 from fastapi import APIRouter, Query, Depends, Header
 from fastapi.responses import JSONResponse
 import asyncpg
-
 import emoji
 import re
-
 from datetime import datetime
-
 from typing import Optional
 
 router = APIRouter()
@@ -18,12 +13,12 @@ def isEmoji(char: str):
 
 async def get_current_user(authorization: Optional[str] = Header(None)):
     if authorization is None:
-        return {}
+        return None
 
     try:
         token = authorization.split(" ")[1]  # "Bearer <token>"
     except IndexError:
-        return {}
+        return None
 
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
@@ -37,14 +32,14 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
 
     if not user_id:
         await conn.close()
-        return {}
+        return None
 
     user = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", user_id)
 
     await conn.close()
 
     if not user:
-        return {}
+        return None
 
     return dict(user)
 
@@ -53,12 +48,16 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
     response_class=JSONResponse,
     summary="ローカルタイムラインを取得します。"
 )
-async def localTimeLine(user: Depends(get_current_user), page: int = Query(default=0, ge=0), since:str = None):
+async def localTimeLine(
+    user: dict = Depends(get_current_user),
+    page: int = Query(default=0, ge=0),
+    since: Optional[str] = None
+):
     """
     ローカルタイムラインを取得します。
     """
     
-    if user is {}:
+    if not user:
         user_id = None
     else:
         user_id = user.get("id", None)
@@ -77,18 +76,18 @@ async def localTimeLine(user: Depends(get_current_user), page: int = Query(defau
     )
 
     prefix = DataHandler.database["prefix"]
-    _letters = list(await conn.fetch(f"SELECT * FROM {prefix}letters WHERE created_at > $1 ORDER BY created_at DESC LIMIT 20 OFFSET $2", since, page*20))
+    _letters = await conn.fetch(f"SELECT * FROM {prefix}letters WHERE created_at > $1 ORDER BY created_at DESC LIMIT 20 OFFSET $2", since, page*20)
 
     letters = []
     for letter in _letters:
-        user = dict(await conn.fetchrow(f"SELECT * FROM {prefix}users WHERE id = $1", letter["user_id"]))
-        if user.get("domain") is not None:
-            continue
-        del user["email"]
-        del user["password"]
-        del user["private_key"]
         letter = dict(letter)
-        letter["user"] = user
+        user_data = dict(await conn.fetchrow(f"SELECT * FROM {prefix}users WHERE id = $1", letter["user_id"]))
+        if user_data.get("domain") is not None:
+            continue
+        del user_data["email"]
+        del user_data["password"]
+        del user_data["private_key"]
+        letter["user"] = user_data
         emojis = await conn.fetch(f"SELECT * FROM {DataHandler.database['prefix']}reactions WHERE letter_id = $1", letter["id"])
         letter["id"] = str(letter["id"])
 
