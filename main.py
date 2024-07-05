@@ -1,31 +1,31 @@
+# Import necessary modules and routers
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import logging
 from contextlib import asynccontextmanager
+import asyncpg
+import aiofiles
+from app.data import DataHandler
 
+# Import endpoint routers
 from app.endpoints import emailauth
-from app.endpoints.api import index as APIIndex
-from app.endpoints.api.users import stat as UserStat
-from app.endpoints.api.users import handle as UserFromHandle
-from app.endpoints.api.users import me as UserFromToken
+from app.endpoints.api import index
+from app.endpoints.api.users import stat, handle, me
 from app.endpoints.api.auth import register, login
 from app.endpoints.api.timeline import local
 from app.endpoints.api.letter.edit import router as edit_letter_router
-from app.endpoints.api.letter.create import router as create_letter_router  # 追加
-from app.endpoints.api.letter.delete import router as delete_letter_router  # 追加
-from app.endpoints.api.letter.letter import router as letter_router  # 追加
-from app.endpoints.api.letter.reaction.create import router as create_reaction_router  # 追加
-from app.endpoints.api.letter.reaction.delete import router as delete_reaction_router  # 追加
-from app.endpoints.wellknown.nodeinfo import router as nodeinfo_router  # 追加
+from app.endpoints.api.letter.create import router as create_letter_router
+from app.endpoints.api.letter.delete import router as delete_letter_router
+from app.endpoints.api.letter.letter import router as letter_router
+from app.endpoints.api.letter.reaction.create import router as create_reaction_router
+from app.endpoints.api.letter.reaction.delete import router as delete_reaction_router
+from app.endpoints.wellknown.nodeinfo import router as nodeinfo_router
 
-import asyncpg
-from app.data import DataHandler
-
-import aiofiles
-
+# Set up logging
 log = logging.getLogger("uvicorn")
 
+# Lifespan management
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     conn: asyncpg.Connection = await asyncpg.connect(
@@ -39,33 +39,35 @@ async def lifespan(app: FastAPI):
     await conn.close()
     log.info("Nyantter started.")
     yield
-    log.info("Nyantter is shutdowning...")
+    log.info("Nyantter is shutting down...")
 
+# Initialize app
 app = FastAPI(
     name="Nyantter",
     lifespan=lifespan
 )
 
+# Register routers
 app.include_router(emailauth.router)
-app.include_router(APIIndex.router)
-app.include_router(UserStat.router)
-app.include_router(UserFromHandle.router)
-app.include_router(UserFromToken.router)
+app.include_router(index.router)
+app.include_router(stat.router)
+app.include_router(handle.router)
+app.include_router(me.router)
 app.include_router(register.router)
 app.include_router(login.router)
 app.include_router(local.router)
-app.include_router(create_letter_router)  # 追加
+app.include_router(create_letter_router)
 app.include_router(edit_letter_router)
 app.include_router(delete_letter_router)
 app.include_router(letter_router)
 app.include_router(create_reaction_router)
 app.include_router(delete_reaction_router)
-app.include_router(nodeinfo_router)  # 追加
+app.include_router(nodeinfo_router)
 
-# Static files setup
+# Static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Root endpoint setup
+# HTML response endpoints
 @app.api_route("/", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
 async def root():
     async with aiofiles.open("pages/index.html", "r", encoding="utf8") as f:
