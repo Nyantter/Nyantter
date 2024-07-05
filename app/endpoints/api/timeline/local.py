@@ -1,6 +1,6 @@
 from ....data import DataHandler
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from fastapi.responses import JSONResponse
 import asyncpg
 
@@ -14,15 +14,52 @@ router = APIRouter()
 def isEmoji(char: str):
     return char in emoji.EMOJI_DATA
 
+async def get_current_user(authorization: Optional[str] = Header(None)):
+    if authorization is None:
+        return None
+
+    try:
+        token = authorization.split(" ")[1]  # "Bearer <token>"
+    except IndexError:
+        return None
+
+    conn: asyncpg.Connection = await asyncpg.connect(
+        host=DataHandler.database["host"],
+        port=DataHandler.database["port"],
+        user=DataHandler.database["user"],
+        password=DataHandler.database["pass"],
+        database=DataHandler.database["name"]
+    )
+
+    user_id = await conn.fetchval(f"SELECT user_id FROM {DataHandler.database['prefix']}tokens WHERE token = $1", token)
+
+    if not user_id:
+        await conn.close()
+        return None
+
+    user = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", user_id)
+
+    await conn.close()
+
+    if not user:
+        return None
+
+    return dict(user)
+
 @router.get(
     "/api/timeline/local",
     response_class=JSONResponse,
     summary="ローカルタイムラインを取得します。"
 )
-async def localTimeLine(page: int = Query(default=0, ge=0), since:str = None):
+async def localTimeLine(page: int = Query(default=0, ge=0), since:str = None, user = Depends(get_current_user)):
     """
     ローカルタイムラインを取得します。
     """
+    
+    if user is None:
+        user_id = None
+    else:
+        user_id = user.get("id", None)
     
     if since is None:
         since = datetime(2000, 1, 1)
@@ -56,6 +93,10 @@ async def localTimeLine(page: int = Query(default=0, ge=0), since:str = None):
         reactions = []
         for _emoji in emojis:
             _emoji = dict(_emoji)
+            if _emoji.get("user_id", 0) == user_id:
+                _emoji["ismine"] = True
+            else:
+                _emoji["ismine"] = False
             pattern = r'^:([A-Za-z0-9_]+):$'
             match = re.match(pattern, _emoji["reaction"])
 
