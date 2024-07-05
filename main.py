@@ -8,6 +8,7 @@ from app.endpoints import emailauth
 from app.endpoints.api import index as APIIndex
 from app.endpoints.api.users import stat as UserStat
 from app.endpoints.api.users import handle as UserFromHandle
+from app.endpoints.api.users import me as UserFromToken
 from app.endpoints.api.auth import register, login
 from app.endpoints.api.timeline import local
 from app.endpoints.api.letter.edit import router as edit_letter_router
@@ -49,6 +50,7 @@ app.include_router(emailauth.router)
 app.include_router(APIIndex.router)
 app.include_router(UserStat.router)
 app.include_router(UserFromHandle.router)
+app.include_router(UserFromToken.router)
 app.include_router(register.router)
 app.include_router(login.router)
 app.include_router(local.router)
