@@ -15,12 +15,12 @@ def isEmoji(char: str):
 
 async def get_current_user(authorization: Optional[str] = Header(None)):
     if authorization is None:
-        return None
+        return {"id": 0}
 
     try:
         token = authorization.split(" ")[1]  # "Bearer <token>"
     except IndexError:
-        return None
+        return {"id": 0}
 
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
@@ -34,14 +34,14 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
 
     if not user_id:
         await conn.close()
-        return None
+        return {"id": 0}
 
     user = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", user_id)
 
     await conn.close()
 
     if not user:
-        return None
+        return {"id": 0}
 
     return dict(user)
 
@@ -59,10 +59,7 @@ async def localTimeLine(
     ローカルタイムラインを取得します。
     """
     
-    if not user:
-        user_id = None
-    else:
-        user_id = user.get("id", None)
+    user_id = user.get("id", 0)
     
     if since is None:
         since = datetime(2000, 1, 1)
@@ -96,7 +93,7 @@ async def localTimeLine(
         reactions = []
         for _emoji in emojis:
             _emoji = dict(_emoji)
-            if _emoji.get("user_id", 0) == user_id:
+            if _emoji.get("user_id", 1) == user_id:
                 _emoji["ismine"] = True
             else:
                 _emoji["ismine"] = False
