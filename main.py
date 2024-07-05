@@ -21,6 +21,8 @@ from app.endpoints.wellknown.nodeinfo import router as nodeinfo_router  # 追加
 import asyncpg
 from app.data import DataHandler
 
+import aiofiles
+
 log = logging.getLogger("uvicorn")
 
 @asynccontextmanager
@@ -64,20 +66,20 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Root endpoint setup
 @app.api_route("/", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
 async def root():
-    with open("pages/timeline.html", "r", encoding="utf8") as f:
-        return HTMLResponse(f.read())
+    async with aiofiles.open("pages/timeline.html", "r", encoding="utf8") as f:
+        return HTMLResponse(await f.read())
 
 @app.api_route("/timeline", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
 async def timeline():
-    with open("pages/timeline.html", "r", encoding="utf8") as f:
-        return HTMLResponse(f.read())
+    async with aiofiles.open("pages/timeline.html", "r", encoding="utf8") as f:
+        return HTMLResponse(await f.read())
 
 @app.api_route("/login", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
 async def login():
-    with open("pages/login.html", "r", encoding="utf8") as f:
-        return HTMLResponse(f.read())
+    async with aiofiles.open("pages/login.html", "r", encoding="utf8") as f:
+        return HTMLResponse(await f.read())
 
 @app.api_route("/register", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
 async def register():
-    with open("pages/register.html", "r", encoding="utf8") as f:
-        return HTMLResponse(f.read())
+    async with aiofiles.open("pages/register.html", "r", encoding="utf8") as f:
+        return HTMLResponse(await f.read())
