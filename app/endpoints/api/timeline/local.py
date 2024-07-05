@@ -53,7 +53,7 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
     response_class=JSONResponse,
     summary="ローカルタイムラインを取得します。"
 )
-async def localTimeLine(page: int = Query(default=0, ge=0), since:str = None, user: dict = Depends(get_current_user)):
+async def localTimeLine(page: int = Query(default=0, ge=0), since:str = None, user: Optional[Depends(get_current_user)] = None):
     """
     ローカルタイムラインを取得します。
     """
