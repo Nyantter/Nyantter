@@ -16,12 +16,6 @@ router = APIRouter()
 def isEmoji(char: str):
     return char in emoji.EMOJI_DATA
 
-from fastapi import FastAPI, Depends, Header, HTTPException
-import asyncpg
-from typing import Optional
-
-app = FastAPI()
-
 class DataHandler:
     database = {
         "host": "localhost",
