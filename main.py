@@ -9,11 +9,14 @@ import aiofiles
 from app.data import DataHandler
 
 # Import endpoint routers
-from app.endpoints import emailauth
-from app.endpoints.api import index
-from app.endpoints.api.users import stat, handle, me
-from app.endpoints.api.auth import register, login
-from app.endpoints.api.timeline import local
+from app.endpoints.emailauth import router as emailauth_router
+from app.endpoints.api.index import router as index_router
+from app.endpoints.api.users.stat import router as stat_router
+from app.endpoints.api.users.handle import router as handle_router
+from app.endpoints.api.users.me import router as me_router
+from app.endpoints.api.auth.register import router as register_router
+from app.endpoints.api.auth.login import router as login_router
+from app.endpoints.api.timeline.local import router as local_router
 from app.endpoints.api.letter.edit import router as edit_letter_router
 from app.endpoints.api.letter.create import router as create_letter_router
 from app.endpoints.api.letter.delete import router as delete_letter_router
@@ -21,8 +24,7 @@ from app.endpoints.api.letter.letter import router as letter_router
 from app.endpoints.api.letter.reaction.create import router as create_reaction_router
 from app.endpoints.api.letter.reaction.delete import router as delete_reaction_router
 from app.endpoints.wellknown.nodeinfo import router as nodeinfo_router
-
-from app.endpoints import frontend
+from app.endpoints.frontend import router as frontend_router
 
 # Set up logging
 log = logging.getLogger("uvicorn")
@@ -50,14 +52,14 @@ app = FastAPI(
 )
 
 # Register routers
-app.include_router(emailauth.router)
-app.include_router(index.router)
-app.include_router(stat.router)
-app.include_router(handle.router)
-app.include_router(me.router)
-app.include_router(register.router)
-app.include_router(login.router)
-app.include_router(local.router)
+app.include_router(emailauth_router)
+app.include_router(index_router)
+app.include_router(stat_router)
+app.include_router(handle_router)
+app.include_router(me_router)
+app.include_router(register_router)
+app.include_router(login_router)
+app.include_router(local_router)
 app.include_router(create_letter_router)
 app.include_router(edit_letter_router)
 app.include_router(delete_letter_router)
@@ -65,8 +67,7 @@ app.include_router(letter_router)
 app.include_router(create_reaction_router)
 app.include_router(delete_reaction_router)
 app.include_router(nodeinfo_router)
-
-app.include_router(frontend.router)
+app.include_router(frontend_router)
 
 # Static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
