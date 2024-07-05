@@ -6,6 +6,8 @@ import re
 from datetime import datetime
 from typing import Optional
 
+from ....data import DataHandler
+
 router = APIRouter()
 
 def isEmoji(char: str):
