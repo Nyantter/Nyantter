@@ -66,7 +66,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Root endpoint setup
 @app.api_route("/", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
 async def root():
-    async with aiofiles.open("pages/timeline.html", "r", encoding="utf8") as f:
+    async with aiofiles.open("pages/index.html", "r", encoding="utf8") as f:
         return HTMLResponse(await f.read())
 
 @app.api_route("/timeline", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
