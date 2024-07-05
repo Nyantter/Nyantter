@@ -62,22 +62,22 @@ app.include_router(nodeinfo_router)  # 追加
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Root endpoint setup
-@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+@app.api_route("/", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
 async def root():
     with open("pages/timeline.html", "r", encoding="utf8") as f:
         return HTMLResponse(f.read())
 
-@app.get("/timeline", response_class=HTMLResponse, include_in_schema=False)
+@app.api_route("/timeline", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
 async def timeline():
     with open("pages/timeline.html", "r", encoding="utf8") as f:
         return HTMLResponse(f.read())
 
-@app.get("/login", response_class=HTMLResponse, include_in_schema=False)
+@app.api_route("/login", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
 async def login():
     with open("pages/login.html", "r", encoding="utf8") as f:
         return HTMLResponse(f.read())
 
-@app.get("/register", response_class=HTMLResponse, include_in_schema=False)
+@app.api_route("/register", methods=['GET', 'HEAD'], response_class=HTMLResponse, include_in_schema=False)
 async def register():
     with open("pages/register.html", "r", encoding="utf8") as f:
         return HTMLResponse(f.read())
