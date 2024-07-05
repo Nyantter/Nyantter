@@ -27,7 +27,7 @@ async def localTimeLine(page: int = Query(default=0, ge=0), since:str = None):
     if since is None:
         since = datetime(2000, 1, 1)
     else:
-        since = datetime.strptime(since, '%Y-%m-%dT%H:%M:%S%z')
+        since = datetime.strptime(since, '%Y-%m-%dT%H:%M:%S.%f%z')
     
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
