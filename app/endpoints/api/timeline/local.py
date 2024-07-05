@@ -1,6 +1,6 @@
 from ....data import DataHandler
 
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, Header
 from fastapi.responses import JSONResponse
 import asyncpg
 
@@ -8,6 +8,8 @@ import emoji
 import re
 
 from datetime import datetime
+
+from typing import Optional
 
 router = APIRouter()
 
