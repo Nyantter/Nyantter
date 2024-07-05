@@ -91,7 +91,7 @@
                 }
             })
             .then(data => {
-                document.cookie = `token=${data.token}; path=/`;
+                document.cookie = `token=${data.token}; path=/; max-age=60*60*24*365`;
                 window.location.href = 'timeline';
             })
             .catch(error => {
