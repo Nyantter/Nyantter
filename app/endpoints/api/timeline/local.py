@@ -51,7 +51,7 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
     summary="ローカルタイムラインを取得します。"
 )
 async def localTimeLine(
-    user: dict = Depends(get_current_user),
+    user: Depends(get_current_user),
     page: int = Query(default=0, ge=0),
     since: Optional[str] = None
 ):
