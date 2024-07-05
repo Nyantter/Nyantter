@@ -8,3 +8,4 @@ snowflake-id
 cryptography
 emoji
 slowapi
+aiofiles
