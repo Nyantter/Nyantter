@@ -38,8 +38,6 @@ async def letter(letter_id: int):
     emojis = await conn.fetch(f"SELECT * FROM {DataHandler.database['prefix']}reactions WHERE letter_id = $1", letter_id)
 
     user_data = dict(await conn.fetchrow(f"SELECT * FROM {prefix}users WHERE id = $1", letter["user_id"]))
-    if user_data.get("domain") is not None:
-        continue
     user_data["info"] = json.loads(user_data["info"])
 
     if not row:
