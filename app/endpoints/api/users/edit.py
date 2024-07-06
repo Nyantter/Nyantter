@@ -92,7 +92,7 @@ async def edit(request: Request, body: EditRequest, current_user: dict = Depends
     RETURNING *
     """
     
-    row = await conn.fetchrow(
+    row = dict(await conn.fetchrow(
         query, 
         display_name, 
         description, 
@@ -100,10 +100,11 @@ async def edit(request: Request, body: EditRequest, current_user: dict = Depends
         header_url, 
         infoData, 
         current_user["id"]
-    )
+    ))
     await conn.close()
     
-    user = User.parse_obj(dict(row))
+    row["info"] = json.loads(row["info"])
+    user = User.parse_obj(row)
     if isinstance(user.created_at, datetime):
         user.created_at = user.created_at.isoformat()
     return user
