@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 class User(BaseModel):
@@ -11,5 +11,5 @@ class User(BaseModel):
     icon_url: Optional[str] = None
     header_url: Optional[str] = None
     description: Optional[str] = None
-    info: Optional[list[dict]] = None
+    info: Optional[List[dict]] = None
     public_key: str
