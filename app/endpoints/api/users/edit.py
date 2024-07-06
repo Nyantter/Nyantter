@@ -71,7 +71,7 @@ async def edit(request: Request, body: EditRequest, current_user: dict = Depends
     info = []
     if body.info is not None:
         for _info in body.info:
-            info.append(_info.json())
+            info.append(_info.dict())
     
     display_name = body.display_name if body.display_name is not None else user["display_name"],
     description = body.description if body.description is not None else user["description"],
