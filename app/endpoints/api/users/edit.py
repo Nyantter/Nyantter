@@ -40,15 +40,6 @@ async def get_current_user(authorization: str = Header(...)):
         await conn.close()
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
-    user = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", user_id)
-
-    if not user:
-        await conn.close()
-        raise HTTPException(status_code=404, detail="User not found")
-
-    await conn.close()
-    return dict(user)
-
 @limiter.limit("5/minute")
 @router.patch(
     "/api/user/edit",
@@ -73,10 +64,10 @@ async def edit(request: Request, body: EditRequest, current_user: dict = Depends
         for _info in body.info:
             info.append(_info.dict())
     
-    display_name = body.display_name if body.display_name is not None else current_user["display_name"],
-    description = body.description if body.description is not None else current_user["description"],
-    icon_url = body.icon_url if body.icon_url is not None else current_user["icon_url"],
-    header_url = body.header_url if body.header_url is not None else current_user["header_url"],
+    display_name = body.display_name if body.display_name is not None else current_user["display_name"]
+    description = body.description if body.description is not None else current_user["description"]
+    icon_url = body.icon_url if body.icon_url is not None else current_user["icon_url"]
+    header_url = body.header_url if body.header_url is not None else current_user["header_url"]
     
     query = f"""
     UPDATE {DataHandler.database['prefix']}users
