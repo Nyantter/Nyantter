@@ -11,6 +11,8 @@ from ....snowflake import Snowflake
 import emoji
 import re
 
+import json
+
 router = APIRouter()
 
 def isEmoji(char: str):
