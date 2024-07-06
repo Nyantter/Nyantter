@@ -53,11 +53,11 @@ async def get_current_user(authorization: str = Header(...)):
 @router.patch(
     "/api/user/edit",
     response_class=JSONResponse,
-    summary="トークンからユーザーを取得します。"
+    summary="ユーザーを編集します。"
 )
 async def edit(request: Request, body: EditRequest, current_user: dict = Depends(get_current_user)):
     """
-    トークンからユーザーを取得します。
+    ユーザーを編集します。
     """
 
     conn: asyncpg.Connection = await asyncpg.connect(
