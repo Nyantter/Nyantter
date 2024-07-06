@@ -91,7 +91,11 @@
                 }
             })
             .then(data => {
-                document.cookie = `token=${data.token}; path=/; max-age=60*60*24*365`;
+                var now = new Date();
+                var time = now.getTime();
+                var expireTime = time + 1000*36000;
+                now.setTime(expireTime);
+                document.cookie = `token=${data.token}; path=/; max-age=60*60*24*365; expires=${now.toUTCString()}`;
                 window.location.href = 'timeline';
             })
             .catch(error => {
