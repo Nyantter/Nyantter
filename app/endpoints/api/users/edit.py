@@ -79,7 +79,7 @@ async def edit(request: Request, body: EditRequest, current_user: dict = Depends
     header_url = body.header_url if body.header_url is not None else current_user["header_url"],
     
     query = f"""
-    UPDATE {DataHandler.database['prefix']}user
+    UPDATE {DataHandler.database['prefix']}users
     SET display_name = $1,
         description = $2,
         icon_url = $3,
