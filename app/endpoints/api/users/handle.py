@@ -10,6 +10,8 @@ from ....snowflake import Snowflake
 
 from ....objects import User
 
+import json
+
 router = APIRouter()
 
 @router.get(
@@ -41,22 +43,23 @@ async def getUserByHandle(handle: str):
     )
 
     if domain is None:
-        row = await conn.fetchrow(
+        row = dict(await conn.fetchrow(
             f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle = $1 AND domain IS NULL",
             handle
-        )
+        ))
     else:
-        row = await conn.fetchrow(
+        row = dict(await conn.fetchrow(
             f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle = $1 AND domain = $2",
             handle, domain
-        )
+        ))
 
     if not row:
         await conn.close()
         raise HTTPException(status_code=404, detail="User not found")  
 
+    row["info"] = json.loads(row["info"])
     # Parse row into User object
-    user = User.parse_obj(dict(row))
+    user = User.parse_obj(row)
 
     # Convert created_at to ISO format if it's a datetime object
     if isinstance(user.created_at, datetime):
