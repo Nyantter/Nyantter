@@ -167,7 +167,6 @@
         let loggedIn = true;
         if (!token) {
             loggedIn = false;
-            document.getElementById("post-btn").style = "display: none;";
         }
 
         function timeAgo(timestamp) {
@@ -368,7 +367,11 @@
             const postBtn = document.getElementById('post-btn');
             const overlay = document.getElementById('overlay');
             postBtn.addEventListener('click', () => {
-                overlay.classList.add('active');
+                if (loggedIn) {
+                    overlay.classList.add('active');
+                } else {
+                    window.location.href = "/login";
+                }
             });
             overlay.addEventListener('click', (event) => {
                 if (event.target === overlay) {
