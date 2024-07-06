@@ -73,10 +73,10 @@ async def edit(request: Request, body: EditRequest, current_user: dict = Depends
         for _info in body.info:
             info.append(_info.dict())
     
-    display_name = body.display_name if body.display_name is not None else user["display_name"],
-    description = body.description if body.description is not None else user["description"],
-    icon_url = body.icon_url if body.icon_url is not None else user["icon_url"],
-    header_url = body.header_url if body.header_url is not None else user["header_url"],
+    display_name = body.display_name if body.display_name is not None else current_user["display_name"],
+    description = body.description if body.description is not None else current_user["description"],
+    icon_url = body.icon_url if body.icon_url is not None else current_user["icon_url"],
+    header_url = body.header_url if body.header_url is not None else current_user["header_url"],
     
     query = """
     UPDATE user
