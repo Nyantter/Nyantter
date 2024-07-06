@@ -37,6 +37,11 @@ async def letter(letter_id: int):
     row = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}letters WHERE id = $1", letter_id)
     emojis = await conn.fetch(f"SELECT * FROM {DataHandler.database['prefix']}reactions WHERE letter_id = $1", letter_id)
 
+    user_data = dict(await conn.fetchrow(f"SELECT * FROM {prefix}users WHERE id = $1", letter["user_id"]))
+    if user_data.get("domain") is not None:
+        continue
+    user_data["info"] = json.loads(user_data["info"])
+
     if not row:
         raise HTTPException(status_code=404, detail="Letter not found")  
 
@@ -69,6 +74,8 @@ async def letter(letter_id: int):
 
     letter = {
         "id": row["id"],
+        "user_id": row["user_id"],
+        "user": user_data,
         "created_at": row["created_at"].isoformat(),  # ISO 8601形式の文字列に変換
         "edited_at": row["edited_at"].isoformat() if row["edited_at"] is not None else None,
         "content": row["content"],
