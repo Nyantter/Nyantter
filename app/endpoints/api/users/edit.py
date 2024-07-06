@@ -98,5 +98,9 @@ async def edit(request: Request, body: EditRequest, current_user: dict = Depends
         info, 
         user_id
     )
+    await conn.close()
+    
     user = User.parse_obj(dict(row))
+    if isinstance(user.created_at, datetime):
+        user.created_at = user.created_at.isoformat()
     return user
