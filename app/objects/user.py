@@ -11,5 +11,5 @@ class User(BaseModel):
     icon_url: Optional[str] = None
     header_url: Optional[str] = None
     description: Optional[str] = None
-    info: Optional[dict] = None
+    info: Optional[list[dict]] = None
     public_key: str
