@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import asyncpg
 from typing import Optional
 from datetime import datetime
+import html
 
 from ....data import DataHandler
 from ....snowflake import Snowflake
