@@ -63,6 +63,8 @@ async def edit_lettter(request: EditLetterRequest, letter_id: int, current_user:
     elif chkLetter["user_id"] != current_user["id"]:
         raise HTTPException(status_code=400, detail="That letter is not yours")      
 
+    letter.content = html.escape(letter.content.replace("\r\n"," "\n").replace("\r", "\n"))
+
     edited_at = datetime.now()
 
     query = f"""
