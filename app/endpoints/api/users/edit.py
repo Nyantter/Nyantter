@@ -96,7 +96,7 @@ async def edit(request: Request, body: EditRequest, current_user: dict = Depends
         icon_url, 
         header_url, 
         info, 
-        user_id
+        current_user["id"]
     )
     await conn.close()
     
