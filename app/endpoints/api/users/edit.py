@@ -11,6 +11,8 @@ from ....snowflake import Snowflake
 from ....ratelimiter import limiter
 from ....objects import User
 
+import json
+
 router = APIRouter()
 
 class UserInfo(BaseModel):
@@ -72,6 +74,7 @@ async def edit(request: Request, body: EditRequest, current_user: dict = Depends
     if body.info is not None:
         for _info in body.info:
             info.append(_info.dict())
+    infoData = json.dumps(info)
     
     display_name = body.display_name if body.display_name is not None else current_user.get("display_name")
     description = body.description if body.description is not None else current_user.get("description")
@@ -95,7 +98,7 @@ async def edit(request: Request, body: EditRequest, current_user: dict = Depends
         description, 
         icon_url, 
         header_url, 
-        info, 
+        infoData, 
         current_user["id"]
     )
     await conn.close()
