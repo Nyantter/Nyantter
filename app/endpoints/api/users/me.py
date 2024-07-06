@@ -11,6 +11,8 @@ from ....snowflake import Snowflake
 from ....ratelimiter import limiter
 from ....objects import User
 
+import json
+
 router = APIRouter()
 
 async def get_current_user(authorization: str = Header(...)):
