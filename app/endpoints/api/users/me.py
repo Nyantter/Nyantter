@@ -50,7 +50,8 @@ async def getuserbytoken(request: Request, current_user: dict = Depends(get_curr
     トークンからユーザーを取得します。
     """
 
-    current_user["info"] = json.loads(current_user["info"])
+    if user_data["info"] is not None:
+        current_user["info"] = json.loads(current_user["info"])
     user = User.parse_obj(current_user)
     if isinstance(user.created_at, datetime):
         user.created_at = user.created_at.isoformat()
