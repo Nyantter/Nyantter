@@ -5,6 +5,7 @@ import emoji
 import re
 from datetime import datetime
 from typing import Optional
+import json
 
 from ....data import DataHandler
 
