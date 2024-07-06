@@ -62,7 +62,7 @@ async def create_letter(request: Request, letter: CreateLetterRequest, current_u
         database=DataHandler.database["name"]
     )
 
-    letter.content = html.escape(letter.content.replace("\r\n"," "\n").replace("\r", "\n"))
+    letter.content = html.escape(letter.content.replace("\r\n", "\n").replace("\r", "\n"))
 
     letter_id = Snowflake.generate()  # SnowflakeでIDを生成
     created_at = datetime.now()
