@@ -45,7 +45,7 @@ async def get_current_user(authorization: str = Header(...)):
     response_class=JSONResponse,
     summary="レターを編集します。"
 )
-async def edit_lettter(request: EditLetterRequest, letter_id: int, current_user: dict = Depends(get_current_user)):
+async def edit_letter(request: EditLetterRequest, letter_id: int, current_user: dict = Depends(get_current_user)):
     """
     レターを編集します。
     """
@@ -64,7 +64,7 @@ async def edit_lettter(request: EditLetterRequest, letter_id: int, current_user:
     elif chkLetter["user_id"] != current_user["id"]:
         raise HTTPException(status_code=400, detail="That letter is not yours")      
 
-    letter.content = html.escape(letter.content.replace("\r\n"," "\n").replace("\r", "\n"))
+    request.content = html.escape(request.content.replace("\r\n", "\n").replace("\r", "\n"))
 
     edited_at = datetime.now()
 
