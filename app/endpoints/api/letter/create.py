@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import asyncpg
 from typing import Optional
 from datetime import datetime
+import html
 
 from ....data import DataHandler
 from ....snowflake import Snowflake
@@ -60,6 +61,8 @@ async def create_letter(request: Request, letter: CreateLetterRequest, current_u
         password=DataHandler.database["pass"],
         database=DataHandler.database["name"]
     )
+
+    letter.content = html.escape(letter.content.replace("\r\n"," "\n").replace("\r", "\n"))
 
     letter_id = Snowflake.generate()  # SnowflakeでIDを生成
     created_at = datetime.now()
