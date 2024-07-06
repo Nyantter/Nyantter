@@ -40,6 +40,15 @@ async def get_current_user(authorization: str = Header(...)):
         await conn.close()
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
+    user = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", user_id)
+
+    if not user:
+        await conn.close()
+        raise HTTPException(status_code=404, detail="User not found")
+
+    await conn.close()
+    return dict(user)
+
 @limiter.limit("5/minute")
 @router.patch(
     "/api/user/edit",
