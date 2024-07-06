@@ -7,6 +7,7 @@ class Snowflake:
         epoch=0,
         timestamp=int(datetime.now().timestamp() * 1000),
     )
-    
-    def generate() -> int:
-        return next(gen)
+
+    @classmethod
+    def generate(cls) -> int:
+        return next(cls.gen)
