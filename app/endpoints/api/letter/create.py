@@ -68,12 +68,12 @@ async def create_letter(request: Request, letter: CreateLetterRequest, current_u
     created_at = datetime.now()
 
     query = f"""
-    INSERT INTO {DataHandler.database['prefix']}letters (id, created_at, content, replyed_to, relettered_to, attachments, user_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
-    RETURNING id, created_at, edited_at, content, replyed_to, relettered_to, attachments
+    INSERT INTO {DataHandler.database['prefix']}letters (id, created_at, content, replyed_to, relettered_to, attachments, user_id, domain)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    RETURNING id, created_at, edited_at, content, replyed_to, relettered_to, attachments, domain
     """
 
-    row = await conn.fetchrow(query, letter_id, created_at, letter.content, letter.replyed_to, letter.relettered_to, letter.attachments, current_user['id'])
+    row = await conn.fetchrow(query, letter_id, created_at, letter.content, letter.replyed_to, letter.relettered_to, letter.attachments, current_user['id'], None)
 
     if not row:
         await conn.close()
@@ -81,12 +81,13 @@ async def create_letter(request: Request, letter: CreateLetterRequest, current_u
 
     letter = {
         "id": row["id"],
+        "domain": row["domain"],
         "created_at": row["created_at"].isoformat(),  # ISO 8601形式の文字列に変換
         "edited_at": row["edited_at"].isoformat() if row["edited_at"] else None,
         "content": row["content"],
         "replyed_to": row["replyed_to"],
         "relettered_to": row["relettered_to"],
-        "attachments": row["attachments"]
+        "attachments": row["attachments"],
     }
 
     await conn.close()

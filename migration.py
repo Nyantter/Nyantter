@@ -72,6 +72,7 @@ async def main():
         await conn.execute(f'''
             CREATE TABLE IF NOT EXISTS {prefix}letters (
                 id BIGINT NOT NULL PRIMARY KEY UNIQUE,
+                domain VARCHAR(253),
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
                 edited_at TIMESTAMP WITH TIME ZONE,
                 user_id BIGINT NOT NULL,

@@ -238,6 +238,8 @@
                                     });
                                 }
 
+								letter.content = letter.content.replace("\n", "<br>");
+
                                 const card = document.createElement('div');
                                 card.className = 'card';
                                 card.setAttribute('data-letterID', letter.id);

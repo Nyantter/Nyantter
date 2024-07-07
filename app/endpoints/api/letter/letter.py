@@ -75,6 +75,7 @@ async def letter(letter_id: int):
 
     letter = {
         "id": row["id"],
+        "domain": row["domain"],
         "user_id": row["user_id"],
         "user": user_data,
         "created_at": row["created_at"].isoformat(),  # ISO 8601形式の文字列に変換

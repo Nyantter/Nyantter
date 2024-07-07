@@ -46,9 +46,9 @@ async def localTimeLine(
     letters = []
     for letter in _letters:
         letter = dict(letter)
-        user_data = dict(await conn.fetchrow(f"SELECT * FROM {prefix}users WHERE id = $1", letter["user_id"]))
-        if user_data.get("domain") is not None:
+        if letter.get("domain") is not None:
             continue
+        user_data = dict(await conn.fetchrow(f"SELECT * FROM {prefix}users WHERE id = $1", letter["user_id"]))
         if user_data["info"] is not None:
             user_data["info"] = json.loads(user_data["info"])
         del user_data["email"]
