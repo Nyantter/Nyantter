@@ -48,7 +48,10 @@ async def lifespan(app: FastAPI):
 
 # Initialize app
 app = FastAPI(
-    name="Nyantter",
+    title="Nyantter",
+    summary="A new SNS",
+    description="# A New SNS",
+    version="v2024.06.26β",
     lifespan=lifespan
 )
 

@@ -4,9 +4,13 @@ server:
   name: Nyantter
   description: Nyantter is a new SNS
 
+  admins: 
+    - name: admin
+      email: admin@example.com
+
   # The url of nyantter server
   # Do not change this value if you have published the Nyantter server at least once.
-  url: https://example.com
+  url: https://example.com/
 
 # account registration setting
 register:
@@ -15,10 +19,6 @@ register:
 
   # Whether or not authentication by e-mail address is required at registration.
   emailRequired: true
-
-  # hcaptcha / turnstile / null
-  # reCAPTCHA is not an option. reCAPTCHA has security risks.
-  authtype: turnstile
 
 # mail sender setting
 mail:

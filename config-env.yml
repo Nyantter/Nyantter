@@ -4,6 +4,10 @@ server:
   name: Nyantter
   description: Nyantterは、Pythonで書かれたSNSらしいですよ。
 
+  admins: 
+    - name: nennneko5787
+      email: nennneko5787@gmail.com
+
   # The url of nyantter server
   # Do not change this value if you have published the Nyantter server at least once.
   url: ${nyan_server_url}

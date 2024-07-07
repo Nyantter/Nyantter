@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 
 from ...data import DataHandler
 
+import asyncpg
+
 router = APIRouter()
 
 nodeinfo_links = {
@@ -17,9 +19,34 @@ nodeinfo_2_0 = {
     "software": {
         "name": "nyantter",
         "version": "2024.06.26β",
-        "repository": "https://github.com/Nyantter/Nyantter"
     },
-    # 他の必要なフィールドを追加
+    "protocols": ["activitypub"],
+    "services": {
+        "inbound": [],
+        "outbound": [
+            "atom1.0",
+            "rss2.0",
+		],
+        "openRegistratons": DataHandler.register["enableRegister"],
+	},
+	"usage": {
+		"users": {
+			"total": 0,
+			"activeHalfyear": None,
+			"activeMonth": None,
+		},
+		"localPosts": 0,
+		"localComments": 0,
+	},
+    "metadata": {
+        "nodeName": DataHandler.server["name"],
+        "nodeDescription": DataHandler.server["description"],
+        "nodeAdmins": DataHandler.server["admins"],
+        "maintainer": {
+            "name": "Nyantter",
+            "email": "nennneko5787+nyantter@gmail.com",
+		}
+	}
 }
 
 nodeinfo_2_1 = {
@@ -29,7 +56,33 @@ nodeinfo_2_1 = {
         "version": "2024.06.26β",
         "repository": "https://github.com/Nyantter/Nyantter"
     },
-    # 他の必要なフィールドを追加
+    "protocols": ["activitypub"],
+    "services": {
+        "inbound": [],
+        "outbound": [
+            "atom1.0",
+            "rss2.0",
+		],
+        "openRegistratons": DataHandler.register["enableRegister"],
+	},
+	"usage": {
+		"users": {
+			"total": 0,
+			"activeHalfyear": None,
+			"activeMonth": None,
+		},
+		"localPosts": 0,
+		"localComments": 0,
+	},
+    "metadata": {
+        "nodeName": DataHandler.server["name"],
+        "nodeDescription": DataHandler.server["description"],
+        "nodeAdmins": DataHandler.server["admins"],
+        "maintainer": {
+            "name": "Nyantter",
+            "email": "nennneko5787+nyantter@gmail.com",
+		}
+	}
 }
 
 @router.get("/.well-known/nodeinfo")
