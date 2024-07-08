@@ -57,7 +57,7 @@ async def getUserByHandle(handle: str):
         await conn.close()
         raise HTTPException(status_code=404, detail="User not found")  
 
-    if user_data["info"] is not None:
+    if row["info"] is not None:
         row["info"] = json.loads(row["info"])
     # Parse row into User object
     user = User.parse_obj(row)

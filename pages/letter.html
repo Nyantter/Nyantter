@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>タイムライン</title>
+    <title>レター</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -137,24 +137,11 @@
     </style>
 </head>
 <body>
-    <div class="container" id="timeline-container">
-        <h2>タイムライン</h2>
-        <div id="posts"></div>
-    </div>
-    <button class="post-btn" id="post-btn">+</button>
-    <div class="overlay" id="overlay">
-        <div class="form-container">
-            <h2>新しい投稿</h2>
-            <form id="post-form">
-                <div class="form-group">
-                    <label for="content">内容</label>
-                    <textarea id="content" name="content" required></textarea>
-                </div>
-                <button type="submit" class="submit-btn">投稿</button>
-            </form>
-        </div>
+    <div class="container" id="letter-container">
     </div>
     <script>
+        let letter_id = window.location.href.split("/")[5];
+
         // クッキーからトークンを取得
         function getCookie(name) {
             let match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -171,28 +158,7 @@
 
         function timeAgo(timestamp) {
             const date = new Date(timestamp);
-            const now = new Date();
-            const seconds = Math.floor((now - date) / 1000);
-
-            // Define time intervals in seconds
-            const intervals = [
-                { label: '年', seconds: 31536000 },
-                { label: 'か月', seconds: 2592000 },
-                { label: '日', seconds: 86400 },
-                { label: '時間', seconds: 3600 },
-                { label: '分', seconds: 60 },
-                { label: '秒', seconds: 1 }
-            ];
-
-            // Calculate time ago
-            for (let i = 0; i < intervals.length; i++) {
-                const interval = intervals[i];
-                const delta = Math.floor(seconds / interval.seconds);
-                if (delta >= 1) {
-                    return `${delta} ${interval.label}前`;
-                }
-            }
-            return 'たった今';
+            return date.toLocaleString();
         }
 
         function fetchOGP(url) {
@@ -237,106 +203,101 @@
         let latestTimestamp = null;
         const displayedPosts = new Set();
 
-        function fetchNewPosts() {
-            const query = latestTimestamp ? `?since=${latestTimestamp}` : '';
-            fetch(`/api/timeline/local${query}`)
+        function fetchPost() {
+            fetch(`/api/letter/${letter_id}`)
                 .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    const postsContainer = document.getElementById('posts');
-                    if (data.letters.length > 0) {
-                        data.letters.reverse().forEach(letter => {
-                            if (!displayedPosts.has(letter.id)) {
-                                let reactionPanel = "";
-                                let reactionEmoji = {};
+                .then(letter => {
+                    console.log(letter);
+                    const postsContainer = document.getElementById('letter-container');
+                    if (!displayedPosts.has(letter.id)) {
+                        let reactionPanel = "";
+                        let reactionEmoji = {};
 
-                                letter.reactions.forEach(reaction => {
-                                    if (!reactionEmoji.hasOwnProperty(reaction.reaction)) {
-                                        reactionEmoji[reaction.reaction] = {
-                                            data: reaction.reaction_data,
-                                            name: reaction.reaction,
-                                            count: 0
-                                        };
+                        letter.reactions.forEach(reaction => {
+                            console.log(reaction);
+                            if (!reactionEmoji.hasOwnProperty(reaction.reaction)) {
+                                let ismine = false;
+
+                                reactionEmoji[reaction.reaction] = {
+                                    data: reaction.reaction_data,
+                                    name: reaction.reaction,
+                                    ismine: ismine,
+                                    count: 0
+                                };
+                            }
+                            reactionEmoji[reaction.reaction]["count"] += 1;
+                            console.log(reactionEmoji[reaction.reaction]);
+                        });
+
+                        if (Object.keys(reactionEmoji).length > 0) {
+                            Object.values(reactionEmoji).forEach(reaction_data => {
+                                if (reaction_data.data.type == "custom") {
+                                    reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}"><img src="${reaction_data.data.image_url}" alt="${reaction_data.data.id}" class="reaction"></img> ${reaction_data.count}</button>`;
+                                } else {
+                                    reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}">${reaction_data.data.emoji} ${reaction_data.count}</button>`;
+                                }
+                            });
+                        }
+
+                        letter.content = letter.content.split('\r\n').join('<br>').split('\r').join('<br>').split('\n').join('<br>');
+                        document.title = `${letter.user.display_name ?? letter.user.handle} (@${letter.user.handle}) さんが投稿: ${letter.content}`;
+                        const regex = /(https?:\/\/[^\s]+)/g;
+                        const matches = letter.content?.match(regex);
+
+                        let ogpPromises = []; // Promiseの配列を作成
+
+                        if (matches) {
+                            matches.forEach(url => {
+                                letter.content = letter.content.replace(url, `<a href="${url}">${url}</a>`);
+                                ogpPromises.push(fetchOGP(url)); // fetchOGPの結果をPromise配列に追加
+                            });
+                        }
+
+                        Promise.all(ogpPromises)
+                            .then(ogpResults => {
+                                let ogpstr = "";
+
+                                ogpResults.forEach(ogp => {
+                                    if (ogp && ogp["og:title"]) {
+                                        ogpstr += `
+                                            <div class="card" style="margin-top: 30px;">
+                                                <a href="${ogp["og:url"] ?? ogp["url"]}">
+                                                    <h5>${ogp["og:title"]}</h5>
+                                                    <span>${ogp["og:url"] ?? ogp["url"]}</span>
+                                                </a>
+                                            </div>
+                                        `;
                                     }
-                                    reactionEmoji[reaction.reaction].count += 1;
                                 });
 
-                                if (Object.keys(reactionEmoji).length > 0) {
-                                    reactionPanel = '<div class="card-reactions">';
-                                    Object.values(reactionEmoji).forEach(reaction_data => {
-                                        if (reaction_data.data.type == "custom") {
-                                            reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}"><img src="${reaction_data.data.image_url}" alt="${reaction_data.data.id}" class="reaction"></img> ${reaction_data.count}</button>`;
-                                        } else {
-                                            reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}">${reaction_data.data.emoji} ${reaction_data.count}</button>`;
-                                        }
-                                    });
-                                    reactionPanel += '</div>';
-                                }
-
-                                // Replace newline characters with <br> tags for proper display
-                                letter.content = letter.content.split('\r\n').join('<br>').split('\r').join('<br>').split('\n').join('<br>');
-
-                                // Check for URLs in the content and fetch OGP data
-                                const regex = /(https?:\/\/[^\s]+)/g;
-                                const matches = letter.content?.match(regex);
-                                let ogpPromises = [];
-
-                                if (matches) {
-                                    matches.forEach(url => {
-                                        letter.content = letter.content.replace(url, `<a href="${url}" target="_blank">${url}</a>`);
-                                        ogpPromises.push(fetchOGP(url)); // Fetch OGP data for each URL
-                                    });
-                                }
-
-                                Promise.all(ogpPromises)
-                                    .then(ogpResults => {
-                                        let ogpCards = '';
-                                        ogpResults.forEach(ogp => {
-                                            if (ogp && ogp["og:title"]) {
-                                                ogpCards += `
-                                                    <div class="card">
-                                                        <a href="${ogp["og:url"] ?? ogp["url"]}" target="_blank">
-                                                            <h5>${ogp["og:title"]}</h5>
-                                                            <span>${ogp["og:url"] ?? ogp["url"]}</span>
-                                                        </a>
-                                                    </div>
-                                                `;
-                                            }
-                                        });
-
-                                        // Construct the post card HTML
-                                        const card = document.createElement('div');
-                                        card.className = 'card';
-                                        card.setAttribute('data-letterID', letter.id);
-                                        card.innerHTML = `
-                                            <h3>
-                                                <div style="display: flex;" onclick="window.location.href = '/@${letter.user.handle}'">
-                                                    <img src="${letter.user.icon_url ?? "/static/images/default-icon.png"}" class="user-icon">
-                                                    <div>
-                                                        <div class="user-displayname">${letter.user.display_name ?? letter.user.handle}</div>
-                                                        <div class="user-handle">@${letter.user.handle}</div>
-                                                    </div>
-                                                </div>
-                                            </h3>
-                                            <div class="card-content" onclick="window.location.href = '/@${letter.user.handle}/letter/${letter.id}'">
-                                                <p>${letter.content}</p>
-                                                <span class="created-at">${timeAgo(letter.created_at)}</span>
-                                                ${reactionPanel}
+                                const card = document.createElement('div');
+                                card.className = 'card';
+                                card.setAttribute('data-letterID', letter.id);
+                                card.innerHTML = `
+                                    <h3>
+                                        <div style="display: flex;" onclick="window.location.href = '/@${letter.user.handle}'">
+                                            <img src="${letter.user.icon_url ?? "/static/images/default-icon.png"}" class="user-icon">
+                                            <div>
+                                                <div class="user-displayname">${letter.user.display_name ?? letter.user.handle}</div>
+                                                <div class="user-handle">@${letter.user.handle}</div>
                                             </div>
-                                            ${ogpCards}
-                                        `;
-                                        postsContainer.prepend(card);
-                                        displayedPosts.add(letter.id);
-                                    })
-                                    .catch(error => {
-                                        console.error('Error fetching OGP data:', error);
-                                    });
-                            }
-                        });
-                        latestTimestamp = data.letters[0].created_at.replace("+", "%2B");
+                                        </div>
+                                    </h3>
+                                    <div class="card-content" onclick="window.location.href = '/@${letter.user.handle}/letter/${letter.id}'">
+                                        <p>${letter.content}</p>
+                                        <span class="created-at">${timeAgo(letter.created_at)}</span>
+                                        <div class="card-reactions">${reactionPanel}</div>
+                                        ${ogpstr} <!-- OGP情報の表示 -->
+                                    </div>
+                                `;
+                                postsContainer.append(card);
+                            })
+                            .catch(error => {
+                                console.error('Error fetching OGP data:', error);
+                            });
                     }
                 })
-                .catch(error => console.error('Error fetching posts:', error));
+                .catch(error => console.error('Error:', error));
         }
 
         function put_reaction(letter_id, reaction){
@@ -391,10 +352,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             // 最初の投稿の読み込み
-            fetchNewPosts();
-
-            // 3秒ごとに新しい投稿をチェック
-            setInterval(fetchNewPosts, 3000);
+            fetchPost();
 
             // 投稿フォームの送信
             const postForm = document.getElementById('post-form');

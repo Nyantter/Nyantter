@@ -39,12 +39,12 @@ async def letter(letter_id: int):
     row = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}letters WHERE id = $1", letter_id)
     emojis = await conn.fetch(f"SELECT * FROM {DataHandler.database['prefix']}reactions WHERE letter_id = $1", letter_id)
 
-    user_data = dict(await conn.fetchrow(f"SELECT * FROM {prefix}users WHERE id = $1", letter["user_id"]))
-    if user_data["info"] is not None:
-        user_data["info"] = json.loads(user_data["info"])
-
     if not row:
         raise HTTPException(status_code=404, detail="Letter not found")  
+
+    user_data = dict(await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", row["user_id"]))
+    if user_data["info"] is not None:
+        user_data["info"] = json.loads(user_data["info"])
 
     reactions = []
     for _emoji in emojis:
@@ -84,7 +84,7 @@ async def letter(letter_id: int):
         "replyed_to": row["replyed_to"],
         "relettered_to": row["relettered_to"],
         "attachments": row["attachments"],
-        "emojis": reactions,
+        "reactions": reactions,
     }
 
     await conn.close()

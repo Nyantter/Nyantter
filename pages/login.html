@@ -89,12 +89,17 @@
                 }
             })
             .then(data => {
-                var now = new Date();
-                var time = now.getTime();
-                var expireTime = time + 1000*36000;
-                now.setTime(expireTime);
-                document.cookie = `token=${data.token}; path=/; max-age=60*60*24*365; expires=${now.toUTCString()}`;
-                window.location.href = 'timeline';
+				let now = new Date();
+				let time = now.getTime();
+				let expireTime = time + (1000 * 36000); // 10時間後の有効期限を設定
+				now.setTime(expireTime);
+
+				// 有効期限を1年後の日付に設定する
+				let expires = new Date(now);
+				expires.setFullYear(expires.getFullYear() + 1);
+
+				document.cookie = `token=${data.token}; path=/; expires=${expires.toUTCString()}`;
+				window.location.href = '/timeline';
             })
             .catch(error => {
                 console.error('Error:', error);
