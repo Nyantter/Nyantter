@@ -18,7 +18,7 @@ nodeinfo_2_0 = {
     "version": "2.0",
     "software": {
         "name": "nyantter",
-        "version": "2024.06.26β",
+        "version": "2024.07.10",
     },
     "protocols": ["activitypub"],
     "services": {
@@ -53,7 +53,7 @@ nodeinfo_2_1 = {
     "version": "2.1",
     "software": {
         "name": "nyantter",
-        "version": "2024.06.26β",
+        "version": "2024.07.10",
         "repository": "https://github.com/Nyantter/Nyantter"
     },
     "protocols": ["activitypub"],
