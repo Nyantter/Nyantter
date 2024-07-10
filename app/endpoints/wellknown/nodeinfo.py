@@ -47,7 +47,6 @@ nodeinfo_2_0 = {
             "email": "nennneko5787+nyantter@gmail.com",
         },
     },
-    "version": "2.0",
 }
 
 nodeinfo_2_1 = {
@@ -84,7 +83,6 @@ nodeinfo_2_1 = {
             "email": "nennneko5787+nyantter@gmail.com",
         },
     },
-    "version": "2.1",
 }
 
 async def get_db_connection():
