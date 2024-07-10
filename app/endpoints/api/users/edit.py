@@ -103,7 +103,7 @@ async def edit(request: Request, body: EditRequest, current_user: dict = Depends
     ))
     await conn.close()
     
-    if user_data["info"] is not None:
+    if row["info"] is not None:
         row["info"] = json.loads(row["info"])
     user = User.parse_obj(row)
     if isinstance(user.created_at, datetime):
