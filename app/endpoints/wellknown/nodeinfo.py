@@ -117,7 +117,7 @@ async def get_nodeinfo_2_0():
     local_letter_count = await conn.fetchval(f"SELECT count(*) FROM {prefix}letters WhERE domain IS NULL")
     nodeinfo_2_0["usage"]["localPosts"] = local_letter_count
     
-    return JSONResponse(content=nodeinfo_2_0)
+    return JSONResponse(content=nodeinfo_2_0, media_type="application/json charset=utf-8")
 
 @router.get("/nodeinfo/2.1")
 async def get_nodeinfo_2_1():
@@ -137,4 +137,4 @@ async def get_nodeinfo_2_1():
     local_letter_count = await conn.fetchval(f"SELECT count(*) FROM {prefix}letters WhERE domain IS NULL")
     nodeinfo_2_1["usage"]["localPosts"] = local_letter_count
     
-    return JSONResponse(content=nodeinfo_2_1)
+    return JSONResponse(content=nodeinfo_2_1media_type="application/json charset=utf-8")
