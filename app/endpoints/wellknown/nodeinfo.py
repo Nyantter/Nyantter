@@ -9,8 +9,8 @@ router = APIRouter()
 
 nodeinfo_links = {
     "links": [
+        {"rel": "http://nodeinfo.diaspora.software/ns/schema/2.1", "href": f"{DataHandler.server['url']}/nodeinfo/2.1"},
         {"rel": "http://nodeinfo.diaspora.software/ns/schema/2.0", "href": f"{DataHandler.server['url']}/nodeinfo/2.0"},
-        {"rel": "http://nodeinfo.diaspora.software/ns/schema/2.1", "href": f"{DataHandler.server['url']}/nodeinfo/2.1"}
     ]
 }
 
