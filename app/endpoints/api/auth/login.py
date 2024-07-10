@@ -33,7 +33,7 @@ async def login(user: LoginUserData):
         database=DataHandler.database["name"]
     )
 
-    row = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle = $1", user.handle)
+    row = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle_lower = $1", user.handle.lower())
 
     if row:
         if bcrypt.checkpw(user.password.encode(), row["password"].encode()):

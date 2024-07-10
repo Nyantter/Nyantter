@@ -45,7 +45,8 @@ async def main():
                 domain VARCHAR(253),
                 email VARCHAR(320) UNIQUE,
                 password TEXT,
-                handle VARCHAR(14) NOT NULL,
+                handle VARCHAR(14) NOT NULL UNIQUE,
+                handle_lower VARCHAR(14) NOT NULL UNIQUE,
                 display_name VARCHAR(16),
                 icon_url TEXT,
                 header_url TEXT,
@@ -120,7 +121,7 @@ async def main():
         ''')
         print("Database migration and update completed successfully.")
     except Exception as e:
-        print(f"Error: {e}")
+        pass
     finally:
         # Close the connection
         await conn.close()

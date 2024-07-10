@@ -137,7 +137,15 @@
     </style>
 </head>
 <body>
-    <div class="container" id="letter-container">
+    <div class="container">
+        <div id="letter-container"></div>
+        <form id="post-form">
+            <div class="form-group">
+                <label for="content">内容</label>
+                <textarea id="content" name="content" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">投稿</button>
+        </form>
     </div>
     <script>
         let letter_id = window.location.href.split("/")[5];
@@ -207,14 +215,12 @@
             fetch(`/api/letter/${letter_id}`)
                 .then(response => response.json())
                 .then(letter => {
-                    console.log(letter);
                     const postsContainer = document.getElementById('letter-container');
                     if (!displayedPosts.has(letter.id)) {
                         let reactionPanel = "";
                         let reactionEmoji = {};
 
                         letter.reactions.forEach(reaction => {
-                            console.log(reaction);
                             if (!reactionEmoji.hasOwnProperty(reaction.reaction)) {
                                 let ismine = false;
 
@@ -226,12 +232,11 @@
                                 };
                             }
                             reactionEmoji[reaction.reaction]["count"] += 1;
-                            console.log(reactionEmoji[reaction.reaction]);
                         });
 
                         if (Object.keys(reactionEmoji).length > 0) {
                             Object.values(reactionEmoji).forEach(reaction_data => {
-                                if (reaction_data.data.type == "custom") {
+                                if (reaction_data.data.type != "normal") {
                                     reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}"><img src="${reaction_data.data.image_url}" alt="${reaction_data.data.id}" class="reaction"></img> ${reaction_data.count}</button>`;
                                 } else {
                                     reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}">${reaction_data.data.emoji} ${reaction_data.count}</button>`;
@@ -243,8 +248,6 @@
                         document.title = `${letter.user.display_name ?? letter.user.handle} (@${letter.user.handle}) さんが投稿: ${letter.content}`;
                         const regex = /(https?:\/\/[^\s]+)/g;
                         const matches = letter.content?.match(regex);
-
-                        let ogpPromises = []; // Promiseの配列を作成
 
                         if (matches) {
                             matches.forEach(url => {
@@ -269,10 +272,9 @@
 								<p>${letter.content}</p>
 								<span class="created-at">${timeAgo(letter.created_at)}</span>
 								<div class="card-reactions">${reactionPanel}</div>
-								${ogpstr} <!-- OGP情報の表示 -->
 							</div>
 						`;
-						postsContainer.append(card);
+						postsContainer.innerHTML = card.outerHTML;
                     }
                 })
                 .catch(error => console.error('Error:', error));
@@ -343,13 +345,12 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ content })
+                    body: JSON.stringify({"content": content, "replyed_to": letter_id})
                 })
                 .then(response => response.json())
                 .then(data => {
                     console.log('投稿成功:', data);
                     document.getElementById('content').value = ''; // フォームをリセット
-                    document.getElementById('overlay').classList.remove('active'); // フォームを閉じる
                 })
                 .catch(error => {
                     console.error('投稿エラー:', error);

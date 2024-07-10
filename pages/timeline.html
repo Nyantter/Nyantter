@@ -279,7 +279,6 @@
                                 // Check for URLs in the content and fetch OGP data
                                 const regex = /(https?:\/\/[^\s]+)/g;
                                 const matches = letter.content?.match(regex);
-                                let ogpPromises = [];
 
                                 if (matches) {
                                     matches.forEach(url => {
@@ -306,7 +305,6 @@
 										<span class="created-at">${timeAgo(letter.created_at)}</span>
 										${reactionPanel}
 									</div>
-									${ogpCards}
 								`;
 								postsContainer.prepend(card);
 								displayedPosts.add(letter.id);

@@ -95,9 +95,9 @@ async def register(request: Request, background_tasks: BackgroundTasks, user: Re
 
         await conn.execute(f"""
             INSERT INTO {DataHandler.database['prefix']}emailcheck
-            (token, email, handle, password)
-            VALUES($1, $2, $3, $4)
-        """, token, user.email, user.handle, user.password)
+            (token, email, handle, password, handle_lower)
+            VALUES($1, $2, $3, $4, $5)
+        """, token, user.email, user.handle, user.password, user.handle.lower())
         await conn.close()
         
         await MailSender.send(

@@ -231,8 +231,6 @@
                         const regex = /(https?:\/\/[^\s]+)/g;
                         const matches = user.description?.match(regex);
 
-                        let ogpPromises = []; // Promiseの配列を作成
-
                         if (matches) {
                             matches.forEach(url => {
                                 user.description = user.description.replace(url, `<a href="${url}">${url}</a>`);
@@ -271,7 +269,6 @@
 							</h3>
 							<div class="card-content">
 								<p>${user.description}</p>
-								${ogpstr}
 								<span class="created-at">登録日: ${timeAgo(user.created_at)}</span>
 							</div>
 							<div style="margin-top: 30px;">
