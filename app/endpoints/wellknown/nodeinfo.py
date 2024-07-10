@@ -27,8 +27,8 @@ nodeinfo_2_0 = {
             "atom1.0",
             "rss2.0",
         ],
-        "openRegistratons": DataHandler.register["enableRegister"],
     },
+    "openRegistratons": DataHandler.register["enableRegister"],
     "usage": {
         "users": {
             "total": 0,
@@ -63,8 +63,8 @@ nodeinfo_2_1 = {
             "atom1.0",
             "rss2.0",
         ],
-        "openRegistratons": DataHandler.register["enableRegister"],
     },
+    "openRegistratons": DataHandler.register["enableRegister"],
     "usage": {
         "users": {
             "total": 0,
