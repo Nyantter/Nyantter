@@ -236,71 +236,50 @@
                         if (matches) {
                             matches.forEach(url => {
                                 user.description = user.description.replace(url, `<a href="${url}">${url}</a>`);
-                                ogpPromises.push(fetchOGP(url)); // fetchOGPの結果をPromise配列に追加
                             });
                         }
 
-                        // Promise.allで全てのOGP取得を待機し、HTMLを構築する
-                        Promise.all(ogpPromises)
-                            .then(ogpResults => {
-                                let ogpstr = "";
+						let infostr = "";
 
-                                ogpResults.forEach(ogp => {
-                                    if (ogp && ogp["og:title"]) {
-                                        ogpstr += `
-                                            <div class="card" style="margin-top: 30px;">
-                                                <a href="${ogp["og:url"] ?? ogp["url"]}">
-                                                    <h5>${ogp["og:title"]}</h5>
-                                                    <span>${ogp["og:url"] ?? ogp["url"]}</span>
-                                                </a>
-                                            </div>
-                                        `;
-                                    }
-                                });
+						user.info?.forEach((info) => {
+							infostr += `
+								<div class="card">
+									<span>${info.name}: </span><span>${info.value}</span>
+								</div>
+							`;
+						});
 
-                                let infostr = "";
+						let header = "";
 
-                                user.info?.forEach((info) => {
-                                    infostr += `
-                                        <div class="card">
-                                            <span>${info.name}: </span><span>${info.value}</span>
-                                        </div>
-                                    `;
-                                });
+						if (user.header_url != null){
+							header = `<img src="${user.header_url}" style="width: 100%; height: 20%;"></img>`;
+						}
 
-                                let header = "";
-
-                                if (user.header_url != null){
-                                    header = `<img src="${user.header_url}" style="width: 100%; height: 20%;"></img>`;
-                                }
-
-                                const card = document.createElement('div');
-                                card.className = 'card';
-                                card.setAttribute('data-userID', user.id);
-                                card.innerHTML = `
-                                    ${header}
-                                    <h3>
-                                        <div style="display: flex;">
-                                            <img src="${user.icon_url ?? "/static/images/default-icon.png"}" class="user-icon">
-                                            <div>
-                                                <div class="user-displayname">${user.display_name ?? user.handle}</div>
-                                                <div class="user-handle">@${user.handle}</div>
-                                            </div>
-                                        </div>
-                                    </h3>
-                                    <div class="card-content">
-                                        <p>${user.description}</p>
-                                        ${ogpstr}
-                                        <span class="created-at">登録日: ${timeAgo(user.created_at)}</span>
-                                    </div>
-                                    <div style="margin-top: 30px;">
-                                        ${infostr}
-                                    </div>
-                                `;
-                                postsContainer.append(card);
-                                displayedPosts.add(user.id);
-                            })
-                            .catch(error => console.error('Error fetching OGP data:', error));
+						const card = document.createElement('div');
+						card.className = 'card';
+						card.setAttribute('data-userID', user.id);
+						card.innerHTML = `
+							${header}
+							<h3>
+								<div style="display: flex;">
+									<img src="${user.icon_url ?? "/static/images/default-icon.png"}" class="user-icon">
+									<div>
+										<div class="user-displayname">${user.display_name ?? user.handle}</div>
+										<div class="user-handle">@${user.handle}</div>
+									</div>
+								</div>
+							</h3>
+							<div class="card-content">
+								<p>${user.description}</p>
+								${ogpstr}
+								<span class="created-at">登録日: ${timeAgo(user.created_at)}</span>
+							</div>
+							<div style="margin-top: 30px;">
+								${infostr}
+							</div>
+						`;
+						postsContainer.append(card);
+						displayedPosts.add(user.id);
                     }
                 })
                 .catch(error => console.error('Error fetching user data:', error));

@@ -249,52 +249,30 @@
                         if (matches) {
                             matches.forEach(url => {
                                 letter.content = letter.content.replace(url, `<a href="${url}">${url}</a>`);
-                                ogpPromises.push(fetchOGP(url)); // fetchOGPの結果をPromise配列に追加
                             });
                         }
 
-                        Promise.all(ogpPromises)
-                            .then(ogpResults => {
-                                let ogpstr = "";
-
-                                ogpResults.forEach(ogp => {
-                                    if (ogp && ogp["og:title"]) {
-                                        ogpstr += `
-                                            <div class="card" style="margin-top: 30px;">
-                                                <a href="${ogp["og:url"] ?? ogp["url"]}">
-                                                    <h5>${ogp["og:title"]}</h5>
-                                                    <span>${ogp["og:url"] ?? ogp["url"]}</span>
-                                                </a>
-                                            </div>
-                                        `;
-                                    }
-                                });
-
-                                const card = document.createElement('div');
-                                card.className = 'card';
-                                card.setAttribute('data-letterID', letter.id);
-                                card.innerHTML = `
-                                    <h3>
-                                        <div style="display: flex;" onclick="window.location.href = '/@${letter.user.handle}'">
-                                            <img src="${letter.user.icon_url ?? "/static/images/default-icon.png"}" class="user-icon">
-                                            <div>
-                                                <div class="user-displayname">${letter.user.display_name ?? letter.user.handle}</div>
-                                                <div class="user-handle">@${letter.user.handle}</div>
-                                            </div>
-                                        </div>
-                                    </h3>
-                                    <div class="card-content" onclick="window.location.href = '/@${letter.user.handle}/letter/${letter.id}'">
-                                        <p>${letter.content}</p>
-                                        <span class="created-at">${timeAgo(letter.created_at)}</span>
-                                        <div class="card-reactions">${reactionPanel}</div>
-                                        ${ogpstr} <!-- OGP情報の表示 -->
-                                    </div>
-                                `;
-                                postsContainer.append(card);
-                            })
-                            .catch(error => {
-                                console.error('Error fetching OGP data:', error);
-                            });
+						const card = document.createElement('div');
+						card.className = 'card';
+						card.setAttribute('data-letterID', letter.id);
+						card.innerHTML = `
+							<h3>
+								<div style="display: flex;" onclick="window.location.href = '/@${letter.user.handle}'">
+									<img src="${letter.user.icon_url ?? "/static/images/default-icon.png"}" class="user-icon">
+									<div>
+										<div class="user-displayname">${letter.user.display_name ?? letter.user.handle}</div>
+										<div class="user-handle">@${letter.user.handle}</div>
+									</div>
+								</div>
+							</h3>
+							<div class="card-content" onclick="window.location.href = '/@${letter.user.handle}/letter/${letter.id}'">
+								<p>${letter.content}</p>
+								<span class="created-at">${timeAgo(letter.created_at)}</span>
+								<div class="card-reactions">${reactionPanel}</div>
+								${ogpstr} <!-- OGP情報の表示 -->
+							</div>
+						`;
+						postsContainer.append(card);
                     }
                 })
                 .catch(error => console.error('Error:', error));
