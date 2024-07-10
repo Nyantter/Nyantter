@@ -137,4 +137,4 @@ async def get_nodeinfo_2_1():
     local_letter_count = await conn.fetchval(f"SELECT count(*) FROM {prefix}letters WhERE domain IS NULL")
     nodeinfo_2_1["usage"]["localPosts"] = local_letter_count
     
-    return JSONResponse(content=nodeinfo_2_1media_type="application/json charset=utf-8")
+    return JSONResponse(content=nodeinfo_2_1, media_type="application/json charset=utf-8")
