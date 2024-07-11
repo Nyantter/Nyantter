@@ -32,5 +32,5 @@ class WebSocketService:
         letter = await LetterService.getLetter(id)
         if not letter:
             return
-        await cls.broadcast({"type": "new_ltl_letter", "data": letter.model_dump()})
+        await cls.broadcast({"type": "letter", "data": letter.model_dump()})
         return
