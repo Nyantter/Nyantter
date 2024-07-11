@@ -1,5 +1,5 @@
 from ..data import DataHandler
-from .user import User
+from .User import User
 from pydantic import BaseModel
 import asyncpg
 

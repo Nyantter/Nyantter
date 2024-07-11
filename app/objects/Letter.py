@@ -1,6 +1,6 @@
 from ..data import DataHandler
-from .reaction import Reaction
-from .user import User
+from .Reaction import Reaction
+from .User import User
 
 from pydantic import BaseModel
 from typing import Optional

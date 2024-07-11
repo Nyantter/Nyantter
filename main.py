@@ -10,6 +10,7 @@ from app.data import DataHandler
 
 # Import endpoint routers
 from app.endpoints.emailauth import router as emailauth_router
+from app.endpoints.websocket import router as ws_router
 from app.endpoints.api.index import router as index_router
 from app.endpoints.api.users.stat import router as stat_router
 from app.endpoints.api.users.handle import router as handle_router
@@ -57,6 +58,7 @@ app = FastAPI(
 
 # Register routers
 app.include_router(emailauth_router)
+app.include_router(ws_router)
 app.include_router(index_router)
 app.include_router(stat_router)
 app.include_router(handle_router)

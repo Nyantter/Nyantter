@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Header, Request
+from fastapi import APIRouter, HTTPException, Depends, Header, Request, BackgroundTasks
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import asyncpg
@@ -10,6 +10,8 @@ from ....data import DataHandler
 from ....snowflake import Snowflake
 
 from ....ratelimiter import limiter
+from ....objects import AuthorizedUser
+from ....services import UserAuthService, WebSocketService
 
 router = APIRouter()
 
@@ -19,38 +21,13 @@ class CreateLetterRequest(BaseModel):
     relettered_to: Optional[int] = None
     attachments: Optional[dict] = None
 
-async def get_current_user(authorization: str = Header(...)):
-    token = authorization.split(" ")[1]  # "Bearer <token>"
-    conn: asyncpg.Connection = await asyncpg.connect(
-        host=DataHandler.database["host"],
-        port=DataHandler.database["port"],
-        user=DataHandler.database["user"],
-        password=DataHandler.database["pass"],
-        database=DataHandler.database["name"]
-    )
-
-    user_id = await conn.fetchval(f"SELECT user_id FROM {DataHandler.database['prefix']}tokens WHERE token = $1", token)
-
-    if not user_id:
-        await conn.close()
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-    user = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", user_id)
-
-    if not user:
-        await conn.close()
-        raise HTTPException(status_code=404, detail="User not found")
-
-    await conn.close()
-    return dict(user)
-
 @limiter.limit("30/minute")
 @router.post(
     "/api/letter/create",
     response_class=JSONResponse,
     summary="新しいレターを作成します。"
 )
-async def create_letter(request: Request, letter: CreateLetterRequest, current_user: dict = Depends(get_current_user)):
+async def create_letter(backgroundTask: BackgroundTasks, request: Request, letter: CreateLetterRequest, current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken)):
     """
     新しいレターを作成します。
     """
@@ -73,7 +50,7 @@ async def create_letter(request: Request, letter: CreateLetterRequest, current_u
     RETURNING id, created_at, edited_at, content, replyed_to, relettered_to, attachments, domain
     """
 
-    row = await conn.fetchrow(query, letter_id, created_at, letter.content, letter.replyed_to, letter.relettered_to, letter.attachments, current_user['id'], None)
+    row = await conn.fetchrow(query, letter_id, created_at, letter.content, letter.replyed_to, letter.relettered_to, letter.attachments, current_user.id, None)
 
     if not row:
         await conn.close()
@@ -91,4 +68,5 @@ async def create_letter(request: Request, letter: CreateLetterRequest, current_u
     }
 
     await conn.close()
+    backgroundTask.add_task(WebSocketService().broadcastLetter, row["id"])
     return letter

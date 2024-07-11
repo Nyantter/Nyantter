@@ -11,48 +11,26 @@ from ....snowflake import Snowflake
 from ....ratelimiter import limiter
 from ....objects import User
 
+from ....objects import AuthorizedUser
+from ....services import UserAuthService
+
 import json
 
 router = APIRouter()
-
-async def get_current_user(authorization: str = Header(...)):
-    token = authorization.split(" ")[1]  # "Bearer <token>"
-    conn: asyncpg.Connection = await asyncpg.connect(
-        host=DataHandler.database["host"],
-        port=DataHandler.database["port"],
-        user=DataHandler.database["user"],
-        password=DataHandler.database["pass"],
-        database=DataHandler.database["name"]
-    )
-
-    user_id = await conn.fetchval(f"SELECT user_id FROM {DataHandler.database['prefix']}tokens WHERE token = $1", token)
-
-    if not user_id:
-        await conn.close()
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-    user = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", user_id)
-
-    if not user:
-        await conn.close()
-        raise HTTPException(status_code=404, detail="User not found")
-
-    await conn.close()
-    return dict(user)
 
 @router.get(
     "/api/user/me",
     response_class=JSONResponse,
     summary="トークンからユーザーを取得します。"
 )
-async def getuserbytoken(request: Request, current_user: dict = Depends(get_current_user)):
+async def getuserbytoken(request: Request, current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken)):
     """
     トークンからユーザーを取得します。
     """
 
-    if user_data["info"] is not None:
-        current_user["info"] = json.loads(current_user["info"])
-    user = User.parse_obj(current_user)
+    if current_user.info is not None:
+        current_user.info = json.loads(current_user.info)
+    user = current_user.getUser()
     if isinstance(user.created_at, datetime):
         user.created_at = user.created_at.isoformat()
     return user

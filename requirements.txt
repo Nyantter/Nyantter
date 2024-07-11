@@ -9,3 +9,4 @@ cryptography
 emoji
 slowapi
 aiofiles
+websockets

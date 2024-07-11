@@ -7,40 +7,17 @@ from datetime import datetime
 
 from ....data import DataHandler
 from ....snowflake import Snowflake
+from ....objects import AuthorizedUser
+from ....services import UserAuthService
 
 router = APIRouter()
-
-async def get_current_user(authorization: str = Header(...)):
-    token = authorization.split(" ")[1]  # "Bearer <token>"
-    conn: asyncpg.Connection = await asyncpg.connect(
-        host=DataHandler.database["host"],
-        port=DataHandler.database["port"],
-        user=DataHandler.database["user"],
-        password=DataHandler.database["pass"],
-        database=DataHandler.database["name"]
-    )
-
-    user_id = await conn.fetchval(f"SELECT user_id FROM {DataHandler.database['prefix']}tokens WHERE token = $1", token)
-
-    if not user_id:
-        await conn.close()
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-    user = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", user_id)
-
-    if not user:
-        await conn.close()
-        raise HTTPException(status_code=404, detail="User not found")
-
-    await conn.close()
-    return dict(user)
 
 @router.delete(
     "/api/letter/{letter_id:int}/delete",
     response_class=Response,
     summary="レターを削除します。"
 )
-async def delete_letter(letter_id: int, current_user: dict = Depends(get_current_user)):
+async def delete_letter(letter_id: int, current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken)):
     """
     レターを削除します。
     """
@@ -56,14 +33,14 @@ async def delete_letter(letter_id: int, current_user: dict = Depends(get_current
 
     if not chkLetter:
         raise HTTPException(status_code=404, detail="Letter not found")
-    elif chkLetter["user_id"] != current_user["id"]:
+    elif chkLetter["user_id"] != current_user.id:
         raise HTTPException(status_code=400, detail="That letter is not yours")      
     query = f"""
         DELETE FROM {DataHandler.database['prefix']}letters
         WHERE id = $1 AND user_id = $2
     """
 
-    row = await conn.execute(query, letter_id, current_user['id'])
+    row = await conn.execute(query, letter_id, current_user.id)
 
     if not row:
         await conn.close()

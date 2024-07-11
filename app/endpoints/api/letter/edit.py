@@ -8,6 +8,8 @@ import html
 
 from ....data import DataHandler
 from ....snowflake import Snowflake
+from ....objects import AuthorizedUser
+from ....services import UserAuthService
 
 router = APIRouter()
 
@@ -15,37 +17,12 @@ class EditLetterRequest(BaseModel):
     content: str
     attachments: Optional[dict] = None
 
-async def get_current_user(authorization: str = Header(...)):
-    token = authorization.split(" ")[1]  # "Bearer <token>"
-    conn: asyncpg.Connection = await asyncpg.connect(
-        host=DataHandler.database["host"],
-        port=DataHandler.database["port"],
-        user=DataHandler.database["user"],
-        password=DataHandler.database["pass"],
-        database=DataHandler.database["name"]
-    )
-
-    user_id = await conn.fetchval(f"SELECT user_id FROM {DataHandler.database['prefix']}tokens WHERE token = $1", token)
-
-    if not user_id:
-        await conn.close()
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-    user = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", user_id)
-
-    if not user:
-        await conn.close()
-        raise HTTPException(status_code=404, detail="User not found")
-
-    await conn.close()
-    return dict(user)
-
 @router.patch(
     "/api/letter/{letter_id:int}/edit",
     response_class=JSONResponse,
     summary="レターを編集します。"
 )
-async def edit_letter(request: EditLetterRequest, letter_id: int, current_user: dict = Depends(get_current_user)):
+async def edit_letter(request: EditLetterRequest, letter_id: int, current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken)):
     """
     レターを編集します。
     """
@@ -61,7 +38,7 @@ async def edit_letter(request: EditLetterRequest, letter_id: int, current_user: 
 
     if not chkLetter:
         raise HTTPException(status_code=404, detail="Letter not found")
-    elif chkLetter["user_id"] != current_user["id"]:
+    elif chkLetter["user_id"] != current_user.id:
         raise HTTPException(status_code=400, detail="That letter is not yours")      
 
     request.content = html.escape(request.content.replace("\r\n", "\n").replace("\r", "\n"))
@@ -75,7 +52,7 @@ async def edit_letter(request: EditLetterRequest, letter_id: int, current_user: 
         RETURNING id, created_at, edited_at, content, replyed_to, relettered_to, attachments
     """
 
-    row = await conn.fetchrow(query, request.content, request.attachments, edited_at, letter_id, current_user['id'])
+    row = await conn.fetchrow(query, request.content, request.attachments, edited_at, letter_id, current_user.id)
 
     if not row:
         await conn.close()
