@@ -1,6 +1,7 @@
 from fastapi import WebSocket
 from typing import List
 from . import LetterService
+import asyncio
 
 class WebSocketService:
     connections: List[WebSocket] = []
@@ -23,8 +24,10 @@ class WebSocketService:
 
     @classmethod
     async def broadcast(cls, json: dict):
+        func = []
         for connection in cls.connections:
-            await connection.send_json(json)
+            func.append(connection.send_json(json))
+        await asyncio.gather(*func)
         return
 
     @classmethod
@@ -32,5 +35,6 @@ class WebSocketService:
         letter = await LetterService.getLetter(id)
         if not letter:
             return
+
         await cls.broadcast({"type": "letter", "data": letter.model_dump()})
         return

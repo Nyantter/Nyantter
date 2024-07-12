@@ -1,4 +1,5 @@
 import asyncpg
+from . import UserService
 from ..data import DataHandler
 from ..objects import Letter
 from typing import Optional
@@ -28,10 +29,7 @@ class LetterService:
             return None
         row = dict(row)
 
-        user_data = dict(await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", row["user_id"]))
-        if user_data["info"] is not None:
-            user_data["info"] = json.loads(user_data["info"])
-        row["user"] = user_data
+        row["user"] = await UserService.getUserFromID(row["user_id"])
 
         reactions = []
         for _emoji in emojis:
@@ -60,6 +58,9 @@ class LetterService:
                 }
             reactions.append(_emoji)
         row["reactions"] = reactions
-        logging.getLogger("uvicorn").info(row)
         letter = Letter.model_validate(row)
+        if isinstance(letter.created_at, datetime):
+            letter.created_at = letter.created_at.isoformat()
+        if isinstance(letter.edited_at, datetime):
+            letter.edited_at = letter.edited_at.isoformat()
         return letter

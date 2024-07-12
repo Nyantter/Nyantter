@@ -1,10 +1,10 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime
 
 class User(BaseModel):
     id: int
-    created_at: datetime
+    created_at: Union[datetime, str]
     handle: str
     handle_lower: str
     domain: Optional[str] = None

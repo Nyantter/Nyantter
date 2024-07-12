@@ -43,3 +43,35 @@ class UserService:
 
         await conn.close()
         return user
+    
+    @classmethod
+    async def getUserFromID(cls, id: int) -> Optional[User]:
+        conn: asyncpg.Connection = await asyncpg.connect(
+            host=DataHandler.database["host"],
+            port=DataHandler.database["port"],
+            user=DataHandler.database["user"],
+            password=DataHandler.database["pass"],
+            database=DataHandler.database["name"]
+        )
+        row = await conn.fetchrow(
+            f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1",
+            id
+        )
+
+        if not row:
+            await conn.close()
+            return None
+        
+        row = dict(row)
+
+        if row["info"] is not None:
+            row["info"] = json.loads(row["info"])
+        # Parse row into User object
+        user = User.model_validate(row)
+
+        # Convert created_at to ISO format if it's a datetime object
+        if isinstance(user.created_at, datetime):
+            user.created_at = user.created_at.isoformat()
+
+        await conn.close()
+        return user
