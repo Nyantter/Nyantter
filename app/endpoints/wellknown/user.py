@@ -35,6 +35,7 @@ async def user(user_id: int):
         "followers": f"{DataHandler.server['url']}/user/{user.id}/followers",
         "following": f"{DataHandler.server['url']}/user/{user.id}/following",
         "icon": {"type": "Image", "url": user.icon_url},
+        "image": {"type": "Image", "url": user.header_url},
         "id": f"{DataHandler.server['url']}/user/{user.id}",
         "inbox": f"{DataHandler.server['url']}/user/{user.id}/inbox",
         "name": user.display_name if user.display_name else user.handle,
