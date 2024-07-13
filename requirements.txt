@@ -1,5 +1,5 @@
-FastAPI
 uvicorn[standard]
+FastAPI
 asyncpg
 aiohttp
 pyyaml
