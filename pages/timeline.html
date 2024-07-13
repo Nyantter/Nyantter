@@ -321,9 +321,9 @@
                                             </div>
                                         </div>
                                     </h3>
-                                    <div class="card-content" onclick="window.location.href = '/@${letter.user.handle}/letter/${letter.id}'">
+                                    <div class="card-content">
                                         <p>${letter.content}</p>
-                                        <span class="created-at">${timeAgo(letter.created_at)}</span>
+                                        <span class="created-at" onclick="window.location.href = '/@${letter.user.handle}/letter/${letter.id}'">${timeAgo(letter.created_at)}</span>
                                         ${reactionPanel}
                                     </div>
                                 `;
