@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Response
+from fastapi.responses import JSONResponse
 from ...services import UserService
 from ...data import DataHandler
 
@@ -10,7 +11,7 @@ async def user(user_id: int):
     user = await UserService.getUserFromID(user_id)
     if not user or user.domain:
         return Response(status_code=404)
-    return {
+    data = {
         "@context": [
             "https://www.w3.org/ns/activitystreams",
             "https://w3id.org/security/v1",
@@ -33,3 +34,6 @@ async def user(user_id: int):
         "type": "Person",
         "url": f"{DataHandler.server['url']}/@{user.handle}",
     }
+    return JSONResponse(
+        content=data, media_type="application/activity+json; charset=utf8"
+    )
