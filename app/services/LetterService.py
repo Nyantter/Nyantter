@@ -1,13 +1,16 @@
+import json
+import logging
+import re
+from datetime import datetime
+from typing import Optional
+
 import asyncpg
-from . import UserService
+import emoji
+
 from ..data import DataHandler
 from ..objects import Letter
-from typing import Optional
-from datetime import datetime
-import json
-import emoji
-import re
-import logging
+from . import UserService
+
 
 class LetterService:
     def isEmoji(char: str):

@@ -1,4 +1,5 @@
-from . import User
+from .User import User
+
 
 class AuthorizedUser(User):
     email: str

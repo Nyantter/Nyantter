@@ -1,12 +1,13 @@
+from datetime import datetime
+from typing import Optional, Union
+
+import asyncpg
+from pydantic import BaseModel
+
 from ..data import DataHandler
 from .Reaction import Reaction
 from .User import User
 
-from pydantic import BaseModel
-from typing import Optional, Union
-import asyncpg
-
-from datetime import datetime
 
 class Letter(BaseModel):
     id: int

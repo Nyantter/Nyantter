@@ -1,6 +1,8 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from ..services import WebSocketService
 from typing import List
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
+from ..services import WebSocketService
 
 router = APIRouter()
 

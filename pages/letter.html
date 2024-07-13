@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +17,7 @@
             padding: 0;
             min-height: 100vh;
         }
+
         .container {
             background-color: #fff;
             padding: 20px;
@@ -25,6 +27,7 @@
             max-width: 600px;
             margin-top: 20px;
         }
+
         .card {
             background-color: #fff;
             padding: 15px;
@@ -33,42 +36,52 @@
             margin-bottom: 10px;
             word-wrap: break-word;
         }
+
         .card h3 {
             margin: 0 0 10px;
         }
+
         .card p {
             margin: 0;
         }
+
         .user-icon {
             width: 48px;
             height: 48px;
             border: solid 0px;
             border-radius: 50%;
         }
+
         .user-displayname {
             padding-left: 4px;
         }
+
         .user-handle {
             padding-left: 6px;
             font-size: 80%;
             color: #898989;
         }
+
         .card-content {
             margin-left: 10px;
             flex-grow: 1;
         }
+
         .card-reactions {
             display: flex;
         }
-        .reaction{
+
+        .reaction {
             width: 24px;
             height: 24px;
         }
+
         .created-at {
             float: right;
             font-size: 12px;
             color: #888;
         }
+
         .post-btn {
             position: fixed;
             bottom: 20px;
@@ -83,8 +96,10 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center; /* 中央揃えにする */
+            justify-content: center;
+            /* 中央揃えにする */
         }
+
         .overlay {
             display: none;
             position: fixed;
@@ -96,9 +111,11 @@
             justify-content: center;
             align-items: center;
         }
+
         .overlay.active {
             display: flex;
         }
+
         .form-container {
             background-color: #fff;
             padding: 20px;
@@ -107,13 +124,16 @@
             width: 90%;
             max-width: 600px;
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
         }
+
         .form-group textarea {
             width: 100%;
             padding: 10px;
@@ -124,6 +144,7 @@
             height: 100px;
             font-size: 100%;
         }
+
         .submit-btn {
             background-color: #28a745;
             color: white;
@@ -136,6 +157,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div id="letter-container"></div>
@@ -172,7 +194,7 @@
         function fetchOGP(url) {
             // Construct the proxy URL with corsproxy.io
             const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-            
+
             // Fetch the HTML content using the proxy URL
             return fetch(proxyUrl)
                 .then(response => {
@@ -183,7 +205,7 @@
                     // Parse the HTML content into a DOM object
                     const domParser = new DOMParser();
                     const dom = domParser.parseFromString(html, 'text/html');
-                    
+
                     // Extract Open Graph Protocol (OGP) metadata from the <head> section
                     let ogp = Object.fromEntries(
                         [...dom.head.children]
@@ -197,7 +219,7 @@
                             ])
                     );
                     ogp["url"] = url;
-                    
+
                     // Return the extracted OGP metadata object
                     return ogp;
                 })
@@ -255,32 +277,32 @@
                             });
                         }
 
-						const card = document.createElement('div');
-						card.className = 'card';
-						card.setAttribute('data-letterID', letter.id);
-						card.innerHTML = `
-							<h3>
-								<div style="display: flex;" onclick="window.location.href = '/@${letter.user.handle}'">
-									<img src="${letter.user.icon_url ?? "/static/images/default-icon.png"}" class="user-icon">
-									<div>
-										<div class="user-displayname">${letter.user.display_name ?? letter.user.handle}</div>
-										<div class="user-handle">@${letter.user.handle}</div>
-									</div>
-								</div>
-							</h3>
-							<div class="card-content" onclick="window.location.href = '/@${letter.user.handle}/letter/${letter.id}'">
-								<p>${letter.content}</p>
-								<span class="created-at">${timeAgo(letter.created_at)}</span>
-								<div class="card-reactions">${reactionPanel}</div>
-							</div>
-						`;
-						postsContainer.innerHTML = card.outerHTML;
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.setAttribute('data-letterID', letter.id);
+                        card.innerHTML = `
+                            <h3>
+                                <div style="display: flex;" onclick="window.location.href = '/@${letter.user.handle}'">
+                                    <img src="${letter.user.icon_url ?? "/static/images/default-icon.png"}" class="user-icon">
+                                    <div>
+                                        <div class="user-displayname">${letter.user.display_name ?? letter.user.handle}</div>
+                                        <div class="user-handle">@${letter.user.handle}</div>
+                                    </div>
+                                </div>
+                            </h3>
+                            <div class="card-content" onclick="window.location.href = '/@${letter.user.handle}/letter/${letter.id}'">
+                                <p>${letter.content}</p>
+                                <span class="created-at">${timeAgo(letter.created_at)}</span>
+                                <div class="card-reactions">${reactionPanel}</div>
+                            </div>
+                        `;
+                        postsContainer.innerHTML = card.outerHTML;
                     }
                 })
                 .catch(error => console.error('Error:', error));
         }
 
-        function put_reaction(letter_id, reaction){
+        function put_reaction(letter_id, reaction) {
             fetch(`/api/letter/${letter_id}/reaction/create`, {
                 method: 'POST',
                 headers: {
@@ -289,17 +311,17 @@
                 },
                 body: JSON.stringify({ reaction })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('リアクション送信成功:', data);
-                update_reaction(letter_id, reaction, true);
-            })
-            .catch(error => {
-                console.error('リアクション送信エラー:', error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    console.log('リアクション送信成功:', data);
+                    update_reaction(letter_id, reaction, true);
+                })
+                .catch(error => {
+                    console.error('リアクション送信エラー:', error);
+                });
         }
 
-        function delete_reaction(letter_id, reaction){
+        function delete_reaction(letter_id, reaction) {
             fetch(`/api/letter/${letter_id}/reaction/delete`, {
                 method: 'DELETE',
                 headers: {
@@ -308,24 +330,24 @@
                 },
                 body: JSON.stringify({ reaction })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('リアクション削除成功:', data);
-                update_reaction(letter_id, reaction, false);
-            })
-            .catch(error => {
-                console.error('リアクション削除エラー:', error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    console.log('リアクション削除成功:', data);
+                    update_reaction(letter_id, reaction, false);
+                })
+                .catch(error => {
+                    console.error('リアクション削除エラー:', error);
+                });
         }
 
-        function update_reaction(letter_id, reaction, isAdd){
+        function update_reaction(letter_id, reaction, isAdd) {
             let reactionBtns = document.querySelectorAll(`[data-letter-id="${letter_id}"][data-reaction="${reaction}"]`);
             console.log(reactionBtns);
             reactionBtns.forEach(btn => {
                 if (isAdd) {
-                    btn.innerHTML = `<span style="color: red;">${btn.innerText.split(" ")[0]}</span> ${parseInt(btn.innerText.split(" ")[1])+1}`;
+                    btn.innerHTML = `<span style="color: red;">${btn.innerText.split(" ")[0]}</span> ${parseInt(btn.innerText.split(" ")[1]) + 1}`;
                 } else {
-                    btn.innerHTML = `${btn.innerText.split(" ")[0]} ${parseInt(btn.innerText.split(" ")[1])-1}`;
+                    btn.innerHTML = `${btn.innerText.split(" ")[0]} ${parseInt(btn.innerText.split(" ")[1]) - 1}`;
                 }
             });
         }
@@ -345,16 +367,16 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({"content": content, "replyed_to": letter_id})
+                    body: JSON.stringify({ "content": content, "replyed_to": letter_id })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('投稿成功:', data);
-                    document.getElementById('content').value = ''; // フォームをリセット
-                })
-                .catch(error => {
-                    console.error('投稿エラー:', error);
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('投稿成功:', data);
+                        document.getElementById('content').value = ''; // フォームをリセット
+                    })
+                    .catch(error => {
+                        console.error('投稿エラー:', error);
+                    });
             });
 
             // リアクションの追加と削除
@@ -390,4 +412,5 @@
         });
     </script>
 </body>
+
 </html>

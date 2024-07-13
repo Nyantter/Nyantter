@@ -4,13 +4,17 @@ server:
   name: Nyantter
   description: Nyantter is a new SNS
 
-  admins: 
+  admins:
     - name: admin
       email: admin@example.com
 
   # The url of nyantter server
   # Do not change this value if you have published the Nyantter server at least once.
   url: https://example.com/
+
+  # The domain that will be displayed on the remote server (other ActivityPub instance).
+  # It should be your domain or a unique value that does not overlap with other servers.
+  remoteDomain: localhost
 
 # account registration setting
 register:

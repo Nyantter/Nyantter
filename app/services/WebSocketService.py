@@ -1,7 +1,10 @@
-from fastapi import WebSocket
-from typing import List
-from . import LetterService
 import asyncio
+from typing import List
+
+from fastapi import WebSocket
+
+from . import LetterService
+
 
 class WebSocketService:
     connections: List[WebSocket] = []

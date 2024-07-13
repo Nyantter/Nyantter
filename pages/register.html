@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,35 +14,43 @@
             align-items: center;
             height: 100vh;
         }
+
         .container {
             background-color: #fff;
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
         }
+
         .form-group input {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
         }
+
         .form-group span {
             color: red;
             display: none;
         }
-        .form-group input:invalid + span {
+
+        .form-group input:invalid+span {
             display: block;
         }
+
         .form-group .password-strength {
             display: block;
             margin-top: 5px;
         }
+
         .submit-btn {
             width: 100%;
             padding: 10px;
@@ -53,6 +62,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h2>登録</h2>
@@ -73,9 +83,9 @@
         </form>
     </div>
     <script>
-        document.getElementById('register-form').addEventListener('submit', function(event) {
+        document.getElementById('register-form').addEventListener('submit', function (event) {
             event.preventDefault();
-            
+
             const formData = new FormData(this);
             const data = {
                 email: formData.get('email'),
@@ -90,23 +100,24 @@
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => {
-                response.json().then((data) => {
-                    if (response.ok && data.detail == "registed") {
-                        document.cookie = `token=${data.token}; path=/`;
-                        window.location.href = 'timeline';
-                    } else if (response.ok) {
-                        alert("登録を受け付けました。記入いただいたメールアドレス宛にメールを送信しましたので、そちらからメール認証を行ってください。\n※メールに記載されているURLの有効期限は5分です。");
-                    } else {
-                        alert('登録に失敗しました。もう一度お試しください。');
-                    }
+                .then(response => {
+                    response.json().then((data) => {
+                        if (response.ok && data.detail == "registed") {
+                            document.cookie = `token=${data.token}; path=/`;
+                            window.location.href = 'timeline';
+                        } else if (response.ok) {
+                            alert("登録を受け付けました。記入いただいたメールアドレス宛にメールを送信しましたので、そちらからメール認証を行ってください。\n※メールに記載されているURLの有効期限は5分です。");
+                        } else {
+                            alert('登録に失敗しました。もう一度お試しください。');
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('エラーが発生しました。もう一度お試しください。');
                 });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('エラーが発生しました。もう一度お試しください。');
-            });
         });
     </script>
 </body>
+
 </html>

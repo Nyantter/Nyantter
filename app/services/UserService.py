@@ -1,9 +1,12 @@
+import json
+from datetime import datetime
+from typing import Optional
+
 import asyncpg
+
 from ..data import DataHandler
 from ..objects import User
-from typing import Optional
-from datetime import datetime
-import json
+
 
 class UserService:
     @classmethod

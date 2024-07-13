@@ -1,20 +1,17 @@
-from fastapi import APIRouter, HTTPException, Depends, Header, Request
+import json
+from datetime import datetime
+from typing import List, Optional
+
+import asyncpg
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-import asyncpg
-from typing import Optional, List
-from datetime import datetime
 
 from ....data import DataHandler
-from ....snowflake import Snowflake
-
+from ....objects import AuthorizedUser, User
 from ....ratelimiter import limiter
-from ....objects import User
-
-from ....objects import AuthorizedUser
 from ....services import UserAuthService
-
-import json
+from ....snowflake import Snowflake
 
 router = APIRouter()
 

@@ -1,26 +1,24 @@
+import asyncio
+import random
+import re
+import string
+from email.mime.text import MIMEText
+from typing import Optional
+
+import asyncpg
+import bcrypt
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
 from ....data import DataHandler
+from ....ratelimiter import limiter
 from ....sendmail import MailSender
 from ....snowflake import Snowflake
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
-from fastapi.responses import JSONResponse
-import asyncpg
-import asyncio
-
-import re
-from pydantic import BaseModel
-
-import bcrypt
-from typing import Optional
-
-import random, string
-from email.mime.text import MIMEText
-
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.backends import default_backend
-
-from ....ratelimiter import limiter
 
 def random_chars(n):
    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]

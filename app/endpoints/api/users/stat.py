@@ -1,8 +1,8 @@
-from ....data import DataHandler
-
+import asyncpg
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-import asyncpg
+
+from ....data import DataHandler
 
 router = APIRouter()
 

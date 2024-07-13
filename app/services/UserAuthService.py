@@ -1,9 +1,12 @@
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi import Depends, HTTPException, Security, Header
+import json
+
+import asyncpg
+from fastapi import Depends, Header, HTTPException, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
 from ..data import DataHandler
 from ..objects import AuthorizedUser
-import asyncpg
-import json
+
 
 class UserAuthService:
     @classmethod

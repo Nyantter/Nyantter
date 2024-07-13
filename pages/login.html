@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,31 +14,38 @@
             align-items: center;
             height: 100vh;
         }
+
         .container {
             background-color: #fff;
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
         }
+
         .form-group input {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
         }
+
         .form-group span {
             color: red;
             display: none;
         }
-        .form-group input:invalid + span {
+
+        .form-group input:invalid+span {
             display: block;
         }
+
         .submit-btn {
             width: 100%;
             padding: 10px;
@@ -49,6 +57,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h2>ログイン</h2>
@@ -65,9 +74,9 @@
         </form>
     </div>
     <script>
-        document.getElementById('login-form').addEventListener('submit', function(event) {
+        document.getElementById('login-form').addEventListener('submit', function (event) {
             event.preventDefault();
-            
+
             const formData = new FormData(this);
             const data = {
                 handle: formData.get('handle'),
@@ -81,31 +90,32 @@
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('ログインに失敗しました。ユーザー名またはパスワードが正しくありません。');
-                }
-            })
-            .then(data => {
-				let now = new Date();
-				let time = now.getTime();
-				let expireTime = time + (1000 * 36000); // 10時間後の有効期限を設定
-				now.setTime(expireTime);
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('ログインに失敗しました。ユーザー名またはパスワードが正しくありません。');
+                    }
+                })
+                .then(data => {
+                    let now = new Date();
+                    let time = now.getTime();
+                    let expireTime = time + (1000 * 36000); // 10時間後の有効期限を設定
+                    now.setTime(expireTime);
 
-				// 有効期限を1年後の日付に設定する
-				let expires = new Date(now);
-				expires.setFullYear(expires.getFullYear() + 1);
+                    // 有効期限を1年後の日付に設定する
+                    let expires = new Date(now);
+                    expires.setFullYear(expires.getFullYear() + 1);
 
-				document.cookie = `token=${data.token}; path=/; expires=${expires.toUTCString()}`;
-				window.location.href = '/timeline';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert(error.message);
-            });
+                    document.cookie = `token=${data.token}; path=/; expires=${expires.toUTCString()}`;
+                    window.location.href = '/timeline';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(error.message);
+                });
         });
     </script>
 </body>
+
 </html>

@@ -1,10 +1,10 @@
+import json
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from ....services import UserService
 
 from ....objects import User
-
-import json
+from ....services import UserService
 
 router = APIRouter()
 

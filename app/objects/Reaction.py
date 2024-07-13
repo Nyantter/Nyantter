@@ -1,7 +1,9 @@
+import asyncpg
+from pydantic import BaseModel
+
 from ..data import DataHandler
 from .User import User
-from pydantic import BaseModel
-import asyncpg
+
 
 class Reaction(BaseModel):
     id: int

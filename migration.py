@@ -1,8 +1,9 @@
-import asyncpg
 import asyncio
-import yaml
-import re
 import os
+import re
+
+import asyncpg
+import yaml
 
 if os.path.isfile(".env"):
     from dotenv import load_dotenv

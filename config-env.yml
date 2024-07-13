@@ -4,13 +4,17 @@ server:
   name: Nyantter
   description: Nyantterは、Pythonで書かれたSNSらしいですよ。
 
-  admins: 
+  admins:
     - name: nennneko5787
       email: nennneko5787@gmail.com
 
   # The url of nyantter server
   # Do not change this value if you have published the Nyantter server at least once.
   url: ${nyan_server_url}
+
+  # The domain that will be displayed on the remote server (other ActivityPub instance).
+  # It should be your domain or a unique value that does not overlap with other servers.
+  remoteDomain: nyantter.f5.si
 
 # account registration setting
 register:

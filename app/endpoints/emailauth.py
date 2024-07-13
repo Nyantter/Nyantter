@@ -1,17 +1,18 @@
 # 作りかけ
 
+import random
+import string
+
+import asyncpg
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from fastapi import APIRouter, Response
+from fastapi.responses import RedirectResponse
+
 from ..data import DataHandler
 from ..snowflake import Snowflake
 
-from fastapi import APIRouter, Response
-from fastapi.responses import RedirectResponse
-import asyncpg
-
-import random, string
-
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.backends import default_backend
 
 def random_chars(n):
    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]

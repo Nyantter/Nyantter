@@ -1,6 +1,9 @@
 from email.mime.multipart import MIMEMultipart
-from .data import DataHandler
+
 import aiosmtplib
+
+from .data import DataHandler
+
 
 class MailSender():
     async def send(*, subject:str, to: str, attach: list):

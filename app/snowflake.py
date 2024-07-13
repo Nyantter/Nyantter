@@ -1,5 +1,7 @@
-from snowflake import SnowflakeGenerator
 from datetime import datetime
+
+from snowflake import SnowflakeGenerator
+
 
 class Snowflake:
     gen = SnowflakeGenerator(

@@ -1,14 +1,16 @@
 # 作りかけ
 
-from ....data import DataHandler
+import random
+import string
 
-from fastapi import APIRouter, HTTPException
-from fastapi.responses import JSONResponse
 import asyncpg
 import bcrypt
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-import random, string
+from ....data import DataHandler
+
 
 def random_chars(n):
    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]

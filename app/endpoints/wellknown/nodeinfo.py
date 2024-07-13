@@ -1,7 +1,8 @@
+import asyncio
+
+import asyncpg
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-import asyncpg
-import asyncio
 
 from ...data import DataHandler
 
