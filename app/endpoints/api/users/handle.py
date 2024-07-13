@@ -8,18 +8,19 @@ from ....services import UserService
 
 router = APIRouter()
 
+
 @router.get(
     "/api/user/@{handle:str}",
     response_class=JSONResponse,
     response_model=User,
-    summary="ユーザーハンドルからユーザーを取得します。"
+    summary="ユーザーハンドルからユーザーを取得します。",
 )
 async def getUserByHandle(handle: str):
     """
     ユーザーハンドルからユーザーを取得します。
     Fediverseユーザーを取得するにはハンドルのあとに**@domain.tld**の形式で書きます。
     """
-    
+
     splitedHandle = handle.split("@")
     if len(splitedHandle) <= 1:
         domain = None
@@ -27,7 +28,10 @@ async def getUserByHandle(handle: str):
         handle = splitedHandle[0]
         domain = splitedHandle[1]
     else:
-        raise HTTPException(status_code=400, detail='Only "@userHandle" or "@userHandle@domain.tld" handle format is accepted')
+        raise HTTPException(
+            status_code=400,
+            detail='Only "@userHandle" or "@userHandle@domain.tld" handle format is accepted',
+        )
 
     user = await UserService.getUser(handle, domain=domain)
     if not user:

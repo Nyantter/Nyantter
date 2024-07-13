@@ -39,9 +39,7 @@ async def create_letter(
     backgroundTask: BackgroundTasks,
     request: Request,
     letter: CreateLetterRequest,
-    current_user: AuthorizedUser = Depends(
-        UserAuthService.getUserFromBearerToken
-    ),
+    current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken),
 ):
     """
     新しいレターを作成します。
@@ -86,12 +84,8 @@ async def create_letter(
     letter = {
         "id": row["id"],
         "domain": row["domain"],
-        "created_at": row[
-            "created_at"
-        ].isoformat(),  # ISO 8601形式の文字列に変換
-        "edited_at": (
-            row["edited_at"].isoformat() if row["edited_at"] else None
-        ),
+        "created_at": row["created_at"].isoformat(),  # ISO 8601形式の文字列に変換
+        "edited_at": (row["edited_at"].isoformat() if row["edited_at"] else None),
         "content": row["content"],
         "replyed_to": row["replyed_to"],
         "relettered_to": row["relettered_to"],

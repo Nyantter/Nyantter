@@ -10,29 +10,32 @@ from ..objects import User
 
 class UserService:
     @classmethod
-    async def getUser(cls, handle: str, *, domain: Optional[str]=None) -> Optional[User]:
+    async def getUser(
+        cls, handle: str, *, domain: Optional[str] = None
+    ) -> Optional[User]:
         conn: asyncpg.Connection = await asyncpg.connect(
             host=DataHandler.database["host"],
             port=DataHandler.database["port"],
             user=DataHandler.database["user"],
             password=DataHandler.database["pass"],
-            database=DataHandler.database["name"]
+            database=DataHandler.database["name"],
         )
         if domain is None:
             row = await conn.fetchrow(
                 f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle_lower = $1 AND domain IS NULL",
-                handle.lower()
+                handle.lower(),
             )
         else:
             row = await conn.fetchrow(
                 f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle_lower = $1 AND domain = $2",
-                handle.lower(), domain.lower()
+                handle.lower(),
+                domain.lower(),
             )
 
         if not row:
             await conn.close()
             return None
-        
+
         row = dict(row)
 
         if row["info"] is not None:
@@ -46,7 +49,7 @@ class UserService:
 
         await conn.close()
         return user
-    
+
     @classmethod
     async def getUserFromID(cls, id: int) -> Optional[User]:
         conn: asyncpg.Connection = await asyncpg.connect(
@@ -54,17 +57,16 @@ class UserService:
             port=DataHandler.database["port"],
             user=DataHandler.database["user"],
             password=DataHandler.database["pass"],
-            database=DataHandler.database["name"]
+            database=DataHandler.database["name"],
         )
         row = await conn.fetchrow(
-            f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1",
-            id
+            f"SELECT * FROM {DataHandler.database['prefix']}users WHERE id = $1", id
         )
 
         if not row:
             await conn.close()
             return None
-        
+
         row = dict(row)
 
         if row["info"] is not None:

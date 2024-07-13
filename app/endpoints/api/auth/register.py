@@ -21,10 +21,12 @@ from ....snowflake import Snowflake
 
 
 def random_chars(n):
-   randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
-   return ''.join(randlst)
+    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
+    return "".join(randlst)
+
 
 router = APIRouter()
+
 
 class RegisterUserData(BaseModel):
     email: Optional[str] = None
@@ -32,49 +34,67 @@ class RegisterUserData(BaseModel):
     password: str
     # captchaanswer: str 別の機会に実装
 
+
 async def deleteToken(token):
     conn: asyncpg.Connection = await asyncpg.connect(
         host=DataHandler.database["host"],
         port=DataHandler.database["port"],
         user=DataHandler.database["user"],
         password=DataHandler.database["pass"],
-        database=DataHandler.database["name"]
+        database=DataHandler.database["name"],
     )
     for _ in range(300):
-        click = await conn.fetchval(f"""
+        click = await conn.fetchval(
+            f"""
             SELECT EXISTS (SELECT * FROM {DataHandler.database['prefix']}emailcheck WHERE token = $1)
-        """, token)
+        """,
+            token,
+        )
         if not click:
             await conn.close()
             return
         await asyncio.sleep(1)
 
-    click = await conn.fetchval(f"""
+    click = await conn.fetchval(
+        f"""
         SELECT EXISTS (SELECT * FROM {DataHandler.database['prefix']}emailcheck WHERE token = $1)
-    """, token)
+    """,
+        token,
+    )
 
     if click:
-        await conn.execute(f"""
+        await conn.execute(
+            f"""
             DELETE FROM {DataHandler.database['prefix']}emailcheck WHERE token = $1
-        """, token)
+        """,
+            token,
+        )
     await conn.close()
+
 
 @limiter.limit("1/hour")
 @router.post(
     "/api/auth/register",
     response_class=JSONResponse,
 )
-async def register(request: Request, background_tasks: BackgroundTasks, user: RegisterUserData):
+async def register(
+    request: Request, background_tasks: BackgroundTasks, user: RegisterUserData
+):
     if re.match(r"[^\a-zA-Z0-9_]", user.handle):
-        raise HTTPException(status_code=400, detail="Username mustn't contain characters other than [a-zA-Z0-9_]")
+        raise HTTPException(
+            status_code=400,
+            detail="Username mustn't contain characters other than [a-zA-Z0-9_]",
+        )
 
     if (user.password is None) or (user.password == ""):
         raise HTTPException(status_code=400, detail="Password mustn't be null")
 
-    if (DataHandler.register["emailRequired"]) and ((user.email is None) or (user.email == "")):
+    if (DataHandler.register["emailRequired"]) and (
+        (user.email is None) or (user.email == "")
+    ):
         raise HTTPException(status_code=400, detail="Email mustn't be null")
 
-    salt = bcrypt.gensalt(rounds=10, prefix=b'2a')
+    salt = bcrypt.gensalt(rounds=10, prefix=b"2a")
     user.password = bcrypt.hashpw(user.password.encode(), salt).decode()
 
     conn: asyncpg.Connection = await asyncpg.connect(
@@ -82,7 +102,7 @@ async def register(request: Request, background_tasks: BackgroundTasks, user: Re
         port=DataHandler.database["port"],
         user=DataHandler.database["user"],
         password=DataHandler.database["pass"],
-        database=DataHandler.database["name"]
+        database=DataHandler.database["name"],
     )
 
     if DataHandler.register["emailRequired"]:
@@ -91,13 +111,20 @@ async def register(request: Request, background_tasks: BackgroundTasks, user: Re
 
         token = random_chars(30)
 
-        await conn.execute(f"""
+        await conn.execute(
+            f"""
             INSERT INTO {DataHandler.database['prefix']}emailcheck
             (token, email, handle, password, handle_lower)
             VALUES($1, $2, $3, $4, $5)
-        """, token, user.email, user.handle, user.password, user.handle.lower())
+        """,
+            token,
+            user.email,
+            user.handle,
+            user.password,
+            user.handle.lower(),
+        )
         await conn.close()
-        
+
         await MailSender.send(
             subject="Registration application has been accepted.",
             to=user.email,
@@ -115,43 +142,56 @@ async def register(request: Request, background_tasks: BackgroundTasks, user: Re
                     </html>
                     """,
                     "html",
-                    "utf-8"
+                    "utf-8",
                 )
-            ]
+            ],
         )
         background_tasks.add_task(deleteToken, token)
-        return {"detail": "Email has been sent; you must click within 5 minutes to validate your email address."}
+        return {
+            "detail": "Email has been sent; you must click within 5 minutes to validate your email address."
+        }
     else:
         uniqueid = Snowflake.generate()
         token = random_chars(30)
 
         key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=2048,
-            backend=default_backend()
+            public_exponent=65537, key_size=2048, backend=default_backend()
         )
         privateKey = key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption()
+            encryption_algorithm=serialization.NoEncryption(),
         )
 
         # 鍵をPEM形式でエクスポート（パブリックキー）
         publicKey = key.public_key().public_bytes(
             encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
         )
 
-        await conn.execute(f"""
+        await conn.execute(
+            f"""
             INSERT INTO {DataHandler.database['prefix']}users
             (id, email, handle, password, public_key, private_key)
             VALUES($1, $2, $3, $4, $5, $6)
-        """, uniqueid, user.email, user.handle, user.password, publicKey.decode('utf8') , privateKey.decode('utf8') )
+        """,
+            uniqueid,
+            user.email,
+            user.handle,
+            user.password,
+            publicKey.decode("utf8"),
+            privateKey.decode("utf8"),
+        )
 
-        await conn.execute(f"""
+        await conn.execute(
+            f"""
             INSERT INTO {DataHandler.database['prefix']}tokens
             (token, permission, user_id)
             VALUES($1, $2, $3)
-        """, token, "all", uniqueid)
+        """,
+            token,
+            "all",
+            uniqueid,
+        )
         await conn.close()
         return {"detail": "registed", "user_id": f"{uniqueid}", "token": token}

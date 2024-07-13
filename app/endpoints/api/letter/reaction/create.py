@@ -98,9 +98,7 @@ async def create_reaction(
             if chkEmoji:
                 reaction = f":{moji}:"
             else:
-                raise HTTPException(
-                    status_code=400, detail="Reaction is not Emoji"
-                )
+                raise HTTPException(status_code=400, detail="Reaction is not Emoji")
     else:
         raise HTTPException(status_code=400, detail="Reaction is not Emoji")
 
@@ -119,9 +117,7 @@ async def create_reaction(
 
     if not row:
         await conn.close()
-        raise HTTPException(
-            status_code=500, detail="Failed to create reaction"
-        )
+        raise HTTPException(status_code=500, detail="Failed to create reaction")
 
     await conn.close()
     return {"detail": "success"}

@@ -85,9 +85,7 @@ async def create_reaction(
 
     if not row:
         await conn.close()
-        raise HTTPException(
-            status_code=500, detail="Failed to delete reaction"
-        )
+        raise HTTPException(status_code=500, detail="Failed to delete reaction")
 
     await conn.close()
     return {"detail": "success"}

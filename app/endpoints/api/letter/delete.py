@@ -16,9 +16,7 @@ router = APIRouter()
 )
 async def delete_letter(
     letter_id: int,
-    current_user: AuthorizedUser = Depends(
-        UserAuthService.getUserFromBearerToken
-    ),
+    current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken),
 ):
     """
     レターを削除します。

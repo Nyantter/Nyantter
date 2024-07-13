@@ -5,8 +5,8 @@ import aiosmtplib
 from .data import DataHandler
 
 
-class MailSender():
-    async def send(*, subject:str, to: str, attach: list):
+class MailSender:
+    async def send(*, subject: str, to: str, attach: list):
         message: MIMEMultipart = MIMEMultipart()
         message["From"] = DataHandler.mail["address"]
         message["To"] = to
@@ -20,5 +20,5 @@ class MailSender():
             local_hostname=DataHandler.mail["host"],
             username=DataHandler.mail["username"],
             password=DataHandler.mail["password"],
-            port=DataHandler.mail["port"]
+            port=DataHandler.mail["port"],
         )

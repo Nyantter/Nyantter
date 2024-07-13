@@ -13,14 +13,17 @@ from ....data import DataHandler
 
 
 def random_chars(n):
-   randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
-   return ''.join(randlst)
+    randlst = [random.choice(string.ascii_letters + string.digits) for i in range(n)]
+    return "".join(randlst)
+
 
 class LoginUserData(BaseModel):
     handle: str
     password: str
 
+
 router = APIRouter()
+
 
 @router.post(
     "/api/auth/login",
@@ -32,25 +35,35 @@ async def login(user: LoginUserData):
         port=DataHandler.database["port"],
         user=DataHandler.database["user"],
         password=DataHandler.database["pass"],
-        database=DataHandler.database["name"]
+        database=DataHandler.database["name"],
     )
 
-    row = await conn.fetchrow(f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle_lower = $1", user.handle.lower())
+    row = await conn.fetchrow(
+        f"SELECT * FROM {DataHandler.database['prefix']}users WHERE handle_lower = $1",
+        user.handle.lower(),
+    )
 
     if row:
         if bcrypt.checkpw(user.password.encode(), row["password"].encode()):
             token = random_chars(30)
-            await conn.execute(f"""
+            await conn.execute(
+                f"""
                 INSERT INTO {DataHandler.database['prefix']}tokens
                 (token, permission, user_id)
                 VALUES($1, $2, $3)
-            """, token, "all", row["id"])
+            """,
+                token,
+                "all",
+                row["id"],
+            )
 
             await conn.close()
             return {"detail": "registed", "user_id": f"{row['id']}", "token": token}
         else:
             await conn.close()
-            raise HTTPException(status_code=400, detail="Username or password incorrect")
+            raise HTTPException(
+                status_code=400, detail="Username or password incorrect"
+            )
     else:
         await conn.close()
         raise HTTPException(status_code=400, detail="Username or password incorrect")

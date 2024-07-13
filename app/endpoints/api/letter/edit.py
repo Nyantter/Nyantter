@@ -27,9 +27,7 @@ class EditLetterRequest(BaseModel):
 async def edit_letter(
     request: EditLetterRequest,
     letter_id: int,
-    current_user: AuthorizedUser = Depends(
-        UserAuthService.getUserFromBearerToken
-    ),
+    current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken),
 ):
     """
     レターを編集します。
@@ -80,9 +78,7 @@ async def edit_letter(
 
     letter = {
         "id": row["id"],
-        "created_at": row[
-            "created_at"
-        ].isoformat(),  # ISO 8601形式の文字列に変換
+        "created_at": row["created_at"].isoformat(),  # ISO 8601形式の文字列に変換
         "edited_at": row["edited_at"].isoformat(),
         "content": row["content"],
         "replyed_to": row["replyed_to"],

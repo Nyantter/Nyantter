@@ -15,9 +15,11 @@ from ....snowflake import Snowflake
 
 router = APIRouter()
 
+
 class UserInfo(BaseModel):
     name: Optional[str] = None
     value: Optional[str] = None
+
 
 class EditRequest(BaseModel):
     display_name: Optional[str] = None
@@ -26,13 +28,16 @@ class EditRequest(BaseModel):
     header_url: Optional[str] = None
     info: Optional[List[UserInfo]] = None
 
+
 @limiter.limit("5/minute")
 @router.patch(
-    "/api/user/edit",
-    response_class=JSONResponse,
-    summary="ユーザーを編集します。"
+    "/api/user/edit", response_class=JSONResponse, summary="ユーザーを編集します。"
 )
-async def edit(request: Request, body: EditRequest, current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken)):
+async def edit(
+    request: Request,
+    body: EditRequest,
+    current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken),
+):
     """
     ユーザーを編集します。
     """
@@ -42,20 +47,28 @@ async def edit(request: Request, body: EditRequest, current_user: AuthorizedUser
         port=DataHandler.database["port"],
         user=DataHandler.database["user"],
         password=DataHandler.database["pass"],
-        database=DataHandler.database["name"]
+        database=DataHandler.database["name"],
     )
-    
+
     info = []
     if body.info is not None:
         for _info in body.info:
             info.append(_info.dict())
     infoData = json.dumps(info)
-    
-    display_name = body.display_name if body.display_name is not None else current_user.display_name
-    description = body.description if body.description is not None else current_user.description
+
+    display_name = (
+        body.display_name
+        if body.display_name is not None
+        else current_user.display_name
+    )
+    description = (
+        body.description if body.description is not None else current_user.description
+    )
     icon_url = body.icon_url if body.icon_url is not None else current_user.icon_url
-    header_url = body.header_url if body.header_url is not None else current_user.header_url
-    
+    header_url = (
+        body.header_url if body.header_url is not None else current_user.header_url
+    )
+
     query = f"""
     UPDATE {DataHandler.database['prefix']}users
     SET display_name = $1,
@@ -66,18 +79,20 @@ async def edit(request: Request, body: EditRequest, current_user: AuthorizedUser
     WHERE id = $6
     RETURNING *
     """
-    
-    row = dict(await conn.fetchrow(
-        query, 
-        display_name, 
-        description, 
-        icon_url, 
-        header_url, 
-        infoData, 
-        current_user.id
-    ))
+
+    row = dict(
+        await conn.fetchrow(
+            query,
+            display_name,
+            description,
+            icon_url,
+            header_url,
+            infoData,
+            current_user.id,
+        )
+    )
     await conn.close()
-    
+
     if row["info"] is not None:
         row["info"] = json.loads(row["info"])
     user = User.model_validate(row)

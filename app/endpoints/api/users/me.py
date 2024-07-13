@@ -15,12 +15,16 @@ from ....snowflake import Snowflake
 
 router = APIRouter()
 
+
 @router.get(
     "/api/user/me",
     response_class=JSONResponse,
-    summary="トークンからユーザーを取得します。"
+    summary="トークンからユーザーを取得します。",
 )
-async def getuserbytoken(request: Request, current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken)):
+async def getuserbytoken(
+    request: Request,
+    current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken),
+):
     """
     トークンからユーザーを取得します。
     """
