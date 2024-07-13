@@ -11,10 +11,26 @@ async def user(user_id: int):
     user = await UserService.getUserFromID(user_id)
     if not user or user.domain:
         return Response(status_code=404)
+    attachments = []
+    for info in user.info:
+        attachments.append(
+            {
+                "type": "PropertyValue",
+                "name": info["name"],
+                "value": info["value"],
+            }
+        )
     data = {
         "@context": [
             "https://www.w3.org/ns/activitystreams",
             "https://w3id.org/security/v1",
+            {
+                "manuallyApprovesFollowers": "as:manuallyApprovesFollowers",
+                "toot": "http://joinmastodon.org/ns#",
+                "discoverable": "toot:discoverable",
+                "schema": "http://schema.org#",
+                "PropertyValue": "schema:PropertyValue",
+            },
         ],
         "followers": f"{DataHandler.server['url']}/user/{user.id}/followers",
         "following": f"{DataHandler.server['url']}/user/{user.id}/following",
@@ -30,6 +46,9 @@ async def user(user_id: int):
             "publicKeyPem": user.public_key,
             "type": "Key",
         },
+        "attachment": attachments,
+        "manuallyApprovesFollowers": False,
+        "discoverable": None,
         "summary": user.description,
         "type": "Person",
         "url": f"{DataHandler.server['url']}/@{user.handle}",

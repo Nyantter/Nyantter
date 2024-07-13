@@ -11,3 +11,4 @@ emoji
 slowapi
 aiofiles
 websockets
+jinja2

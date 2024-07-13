@@ -1,69 +1,79 @@
-import aiofiles
-from fastapi import APIRouter
+from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from ..services import LetterService, UserService
 
 router = APIRouter()
+templates = Jinja2Templates(directory="pages")
 
 
-# HTML response endpoints
-@router.api_route(
-    "/", methods=["GET", "HEAD"], response_class=HTMLResponse, include_in_schema=False
+@router.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    template_name = "index.html"
+    return templates.TemplateResponse(template_name, {"request": request})
+
+
+@router.get("/timeline", response_class=HTMLResponse)
+async def timeline(request: Request):
+    template_name = "timeline.html"
+    return templates.TemplateResponse(template_name, {"request": request})
+
+
+@router.get("/@{handle:str}", response_class=HTMLResponse)
+async def user(request: Request, handle: str):
+    splitedHandle = handle.split("@")
+    if len(splitedHandle) <= 1:
+        domain = None
+    elif len(splitedHandle) == 2:
+        handle = splitedHandle[0]
+        domain = splitedHandle[1]
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail="エラーページは実装できてません！ｗ",
+        )
+
+    user = UserService.getUser(handle, domain=domain)
+    if not user:
+        raise HTTPException(
+            status_code=404, detail="エラーページは実装できてません！ｗ"
+        )
+
+    template_name = "user.html"
+    return templates.TemplateResponse(
+        template_name, {"request": request, "handle": handle, "user": user}
+    )
+
+
+@router.get(
+    "/@{handle:str}/letter/{letter_id:int}", response_class=HTMLResponse
 )
-async def root():
-    async with aiofiles.open("pages/index.html", "r", encoding="utf8") as f:
-        return HTMLResponse(await f.read())
+async def user_letter(request: Request, handle: str, letter_id: int):
+    letter = LetterService.getLetter(letter_id)
+    if not letter:
+        raise HTTPException(
+            status_code=404, detail="エラーページは実装できてません！ｗ"
+        )
+
+    template_name = "letter.html"
+    return templates.TemplateResponse(
+        template_name,
+        {
+            "request": request,
+            "handle": handle,
+            "letter_id": letter_id,
+            "letter": letter,
+        },
+    )
 
 
-@router.api_route(
-    "/timeline",
-    methods=["GET", "HEAD"],
-    response_class=HTMLResponse,
-    include_in_schema=False,
-)
-async def timeline():
-    async with aiofiles.open("pages/timeline.html", "r", encoding="utf8") as f:
-        return HTMLResponse(await f.read())
+@router.get("/login", response_class=HTMLResponse)
+async def login(request: Request):
+    template_name = "login.html"
+    return templates.TemplateResponse(template_name, {"request": request})
 
 
-@router.api_route(
-    "/@{handle:str}",
-    methods=["GET", "HEAD"],
-    response_class=HTMLResponse,
-    include_in_schema=False,
-)
-async def user():
-    async with aiofiles.open("pages/user.html", "r", encoding="utf8") as f:
-        return HTMLResponse(await f.read())
-
-
-@router.api_route(
-    "/@{handle:str}/letter/{letter_id:int}",
-    methods=["GET", "HEAD"],
-    response_class=HTMLResponse,
-    include_in_schema=False,
-)
-async def user_letter():
-    async with aiofiles.open("pages/letter.html", "r", encoding="utf8") as f:
-        return HTMLResponse(await f.read())
-
-
-@router.api_route(
-    "/login",
-    methods=["GET", "HEAD"],
-    response_class=HTMLResponse,
-    include_in_schema=False,
-)
-async def login():
-    async with aiofiles.open("pages/login.html", "r", encoding="utf8") as f:
-        return HTMLResponse(await f.read())
-
-
-@router.api_route(
-    "/register",
-    methods=["GET", "HEAD"],
-    response_class=HTMLResponse,
-    include_in_schema=False,
-)
-async def register():
-    async with aiofiles.open("pages/register.html", "r", encoding="utf8") as f:
-        return HTMLResponse(await f.read())
+@router.get("/register", response_class=HTMLResponse)
+async def register(request: Request):
+    template_name = "register.html"
+    return templates.TemplateResponse(template_name, {"request": request})
