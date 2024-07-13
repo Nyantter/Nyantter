@@ -2,7 +2,7 @@
 
 server:
   name: Nyantter
-  description: Nyantterは、Pythonで書かれたSNSらしいですよ。
+  description: Nyantterは、PythonのFastAPIで書かれたSNSです。
 
   admins:
     - name: nennneko5787
