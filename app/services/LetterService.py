@@ -1,5 +1,3 @@
-import json
-import logging
 import re
 from datetime import datetime
 from typing import Optional
@@ -9,7 +7,7 @@ import emoji
 
 from ..data import DataHandler
 from ..objects import Letter
-from . import UserService
+from .UserService import UserService
 
 
 class LetterService:
