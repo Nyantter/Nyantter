@@ -249,7 +249,6 @@
                         let reactionPanel = "";
                         let reactionEmoji = {};
 
-                        user.description = user.description?.split('\r\n').join('<br>').split('\r').join('<br>').split('\n').join('<br>');
                         const regex = /(https?:\/\/[^\s]+)/g;
                         const matches = user.description?.match(regex);
 
@@ -258,6 +257,7 @@
                                 user.description = user.description.replace(url, `<a href="${url}">${url}</a>`);
                             });
                         }
+                        user.description = user.description?.split('\r\n').join('<br>').split('\r').join('<br>').split('\n').join('<br>');
 
                         let infostr = "";
 

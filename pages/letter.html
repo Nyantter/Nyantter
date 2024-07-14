@@ -266,8 +266,6 @@
                             });
                         }
 
-                        letter.content = letter.content.split('\r\n').join('<br>').split('\r').join('<br>').split('\n').join('<br>');
-                        document.title = `${letter.user.display_name ?? letter.user.handle} (@${letter.user.handle}) さんが投稿: ${letter.content}`;
                         const regex = /(https?:\/\/[^\s]+)/g;
                         const matches = letter.content?.match(regex);
 
@@ -276,6 +274,9 @@
                                 letter.content = letter.content.replace(url, `<a href="${url}">${url}</a>`);
                             });
                         }
+                        
+                        letter.content = letter.content.split('\r\n').join('<br>').split('\r').join('<br>').split('\n').join('<br>');
+                        document.title = `${letter.user.display_name ?? letter.user.handle} (@${letter.user.handle}) さんが投稿: ${letter.content}`;
 
                         const card = document.createElement('div');
                         card.className = 'card';

@@ -295,9 +295,6 @@
                                     reactionPanel += '</div>';
                                 }
 
-                                // Replace newline characters with <br> tags for proper display
-                                letter.content = letter.content.split('\r\n').join('<br>').split('\r').join('<br>').split('\n').join('<br>');
-
                                 // Check for URLs in the content and fetch OGP data
                                 const regex = /(https?:\/\/[^\s]+)/g;
                                 const matches = letter.content?.match(regex);
@@ -307,6 +304,8 @@
                                         letter.content = letter.content.replace(url, `<a href="${url}" target="_blank">${url}</a>`);
                                     });
                                 }
+
+                                letter.content = letter.content.split('\r\n').join('<br>').split('\r').join('<br>').split('\n').join('<br>');
 
                                 // Construct the post card HTML
                                 const card = document.createElement('div');
@@ -322,9 +321,9 @@
                                             </div>
                                         </div>
                                     </h3>
-                                    <div class="card-content" onclick="window.location.href = '/@${letter.user.handle}/letter/${letter.id}'">
+                                    <div class="card-content">
                                         <p>${letter.content}</p>
-                                        <span class="created-at">${timeAgo(letter.created_at)}</span>
+                                        <span class="created-at" onclick="window.location.href = '/@${letter.user.handle}/letter/${letter.id}'">${timeAgo(letter.created_at)}</span>
                                         ${reactionPanel}
                                     </div>
                                 `;
@@ -429,9 +428,6 @@
                             reactionPanel += '</div>';
                         }
 
-                        // Replace newline characters with <br> tags for proper display
-                        letter.content = letter.content.split('\r\n').join('<br>').split('\r').join('<br>').split('\n').join('<br>');
-
                         // Check for URLs in the content and fetch OGP data
                         const regex = /(https?:\/\/[^\s]+)/g;
                         const matches = letter.content?.match(regex);
@@ -441,6 +437,7 @@
                                 letter.content = letter.content.replace(url, `<a href="${url}" target="_blank">${url}</a>`);
                             });
                         }
+                        letter.content = letter.content.split('\r\n').join('<br>').split('\r').join('<br>').split('\n').join('<br>');
 
                         // Construct the post card HTML
                         const card = document.createElement('div');
