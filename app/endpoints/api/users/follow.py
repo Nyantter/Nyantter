@@ -10,15 +10,15 @@ from pydantic import BaseModel
 from ....data import DataHandler
 from ....objects import AuthorizedUser, User
 from ....ratelimiter import limiter
-from ....services import UserAuthService, UserFollowService, UserService
+from ....services import UserAuthService, UserService
 from ....snowflake import Snowflake
 
 router = APIRouter()
 
 
 @limiter.limit("30/minute")
-@router.patch(
-    "/api/user/{user_id:str}/follow",
+@router.post(
+    "/api/user/@{handle:str}/follow",
     response_class=JSONResponse,
     summary="ユーザーをフォローします。",
 )

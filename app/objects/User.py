@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import List, Optional, Union
+import json
 
 import asyncpg
 from pydantic import BaseModel
@@ -22,7 +23,7 @@ class User(BaseModel):
     followers: List[int]
     public_key: str
 
-    async def follow(self, *, target: "User") -> bool:
+    async def follow(self, target: "User") -> bool:
         conn: asyncpg.Connection = await asyncpg.connect(
             host=DataHandler.database["host"],
             port=DataHandler.database["port"],
@@ -38,7 +39,7 @@ class User(BaseModel):
                 SET followers = $1
                 WHERE id = $2
                 """,
-                target.followers,
+                json.dumps(target.followers),
                 target.id,
             )
             self.following.remove(target.id)
@@ -48,29 +49,29 @@ class User(BaseModel):
                 SET following = $1
                 WHERE id = $2
                 """,
-                self.following,
+                json.dumps(self.following),
                 self.id,
             )
             return False
         else:
-            target.followers.add(self.id)
+            target.followers.append(self.id)
             await conn.execute(
                 f"""
                 UPDATE {DataHandler.database['prefix']}users
                 SET followers = $1
                 WHERE id = $2
                 """,
-                target.followers,
+                json.dumps(target.followers),
                 target.id,
             )
-            self.following.add(target.id)
+            self.following.append(target.id)
             await conn.execute(
                 f"""
                 UPDATE {DataHandler.database['prefix']}users
                 SET following = $1
                 WHERE id = $2
                 """,
-                self.following,
+                json.dumps(self.following),
                 self.id,
             )
             return True
