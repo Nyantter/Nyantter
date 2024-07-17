@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+
 from ..services import LetterService, UserService
+from ..data import DataHandler
 
 router = APIRouter()
 templates = Jinja2Templates(directory="pages")
@@ -33,7 +35,7 @@ async def user(request: Request, handle: str):
             detail="エラーページは実装できてません！ｗ",
         )
 
-    user = UserService.getUser(handle, domain=domain)
+    user = await UserService.getUser(handle, domain=domain)
     if not user:
         raise HTTPException(
             status_code=404, detail="エラーページは実装できてません！ｗ"
@@ -41,15 +43,13 @@ async def user(request: Request, handle: str):
 
     template_name = "user.html"
     return templates.TemplateResponse(
-        template_name, {"request": request, "handle": handle, "user": user}
+        template_name, {"request": request, "user": user, "DataHandler": DataHandler}
     )
 
 
-@router.get(
-    "/@{handle:str}/letter/{letter_id:int}", response_class=HTMLResponse
-)
+@router.get("/@{handle:str}/letter/{letter_id:int}", response_class=HTMLResponse)
 async def user_letter(request: Request, handle: str, letter_id: int):
-    letter = LetterService.getLetter(letter_id)
+    letter = await LetterService.getLetter(letter_id)
     if not letter:
         raise HTTPException(
             status_code=404, detail="エラーページは実装できてません！ｗ"
@@ -60,9 +60,8 @@ async def user_letter(request: Request, handle: str, letter_id: int):
         template_name,
         {
             "request": request,
-            "handle": handle,
-            "letter_id": letter_id,
             "letter": letter,
+            "DataHandler": DataHandler,
         },
     )
 

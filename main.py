@@ -14,12 +14,8 @@ from app.endpoints.api.letter.create import router as create_letter_router
 from app.endpoints.api.letter.delete import router as delete_letter_router
 from app.endpoints.api.letter.edit import router as edit_letter_router
 from app.endpoints.api.letter.letter import router as letter_router
-from app.endpoints.api.letter.reaction.create import (
-    router as create_reaction_router,
-)
-from app.endpoints.api.letter.reaction.delete import (
-    router as delete_reaction_router,
-)
+from app.endpoints.api.letter.reaction.create import router as create_reaction_router
+from app.endpoints.api.letter.reaction.delete import router as delete_reaction_router
 from app.endpoints.api.timeline.local import router as local_router
 from app.endpoints.api.users.edit import router as edit_router
 from app.endpoints.api.users.handle import router as handle_router
@@ -29,8 +25,8 @@ from app.endpoints.emailauth import router as emailauth_router
 from app.endpoints.frontend import router as frontend_router
 from app.endpoints.websocket import router as ws_router
 from app.endpoints.wellknown.nodeinfo import router as nodeinfo_router
-from app.endpoints.wellknown.webfinger import router as webfinger_router
 from app.endpoints.wellknown.user import router as wk_user_router
+from app.endpoints.wellknown.webfinger import router as webfinger_router
 
 # Set up logging
 log = logging.getLogger("uvicorn")

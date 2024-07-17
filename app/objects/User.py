@@ -1,7 +1,10 @@
 from datetime import datetime
 from typing import List, Optional, Union
 
+import asyncpg
 from pydantic import BaseModel
+
+from ..data import DataHandler
 
 
 class User(BaseModel):
@@ -15,4 +18,59 @@ class User(BaseModel):
     header_url: Optional[str] = None
     description: Optional[str] = None
     info: Optional[List[dict]] = None
+    following: List[int]
+    followers: List[int]
     public_key: str
+
+    async def follow(self, *, target: "User") -> bool:
+        conn: asyncpg.Connection = await asyncpg.connect(
+            host=DataHandler.database["host"],
+            port=DataHandler.database["port"],
+            user=DataHandler.database["user"],
+            password=DataHandler.database["pass"],
+            database=DataHandler.database["name"],
+        )
+        if self.id in target.followers:
+            target.followers.remove(self.id)
+            await conn.execute(
+                f"""
+                UPDATE {DataHandler.database['prefix']}users
+                SET followers = $1
+                WHERE id = $2
+                """,
+                target.followers,
+                target.id,
+            )
+            self.following.remove(target.id)
+            await conn.execute(
+                f"""
+                UPDATE {DataHandler.database['prefix']}users
+                SET following = $1
+                WHERE id = $2
+                """,
+                self.following,
+                self.id,
+            )
+            return False
+        else:
+            target.followers.add(self.id)
+            await conn.execute(
+                f"""
+                UPDATE {DataHandler.database['prefix']}users
+                SET followers = $1
+                WHERE id = $2
+                """,
+                target.followers,
+                target.id,
+            )
+            self.following.add(target.id)
+            await conn.execute(
+                f"""
+                UPDATE {DataHandler.database['prefix']}users
+                SET following = $1
+                WHERE id = $2
+                """,
+                self.following,
+                self.id,
+            )
+            return True

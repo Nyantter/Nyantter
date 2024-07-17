@@ -186,6 +186,7 @@
 
         // トークンが存在しない場合、投稿ボタンを隠す
         const token = getCookie('token');
+        const userID = getCookie('userID');
         let loggedIn = true;
         if (!token) {
             loggedIn = false;
@@ -277,8 +278,12 @@
                                         reactionEmoji[reaction.reaction] = {
                                             data: reaction.reaction_data,
                                             name: reaction.reaction,
+                                            ismine: false,
                                             count: 0
                                         };
+                                    }
+                                    if (reaction.user_id == userID){
+                                        reactionEmoji[reaction.reaction].ismine = true;
                                     }
                                     reactionEmoji[reaction.reaction].count += 1;
                                 });
@@ -287,9 +292,9 @@
                                     reactionPanel = '<div class="card-reactions">';
                                     Object.values(reactionEmoji).forEach(reaction_data => {
                                         if (reaction_data.data.type == "custom") {
-                                            reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}"><img src="${reaction_data.data.image_url}" alt="${reaction_data.data.id}" class="reaction"></img> ${reaction_data.count}</button>`;
+                                            reactionPanel += `<button data-ismine="${reaction_data.ismine}" title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}"><img src="${reaction_data.data.image_url}" alt="${reaction_data.data.id}" class="reaction"></img> ${reaction_data.count}</button>`;
                                         } else {
-                                            reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}">${reaction_data.data.emoji} ${reaction_data.count}</button>`;
+                                            reactionPanel += `<button data-ismine="${reaction_data.ismine}" title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}">${reaction_data.data.emoji} ${reaction_data.count}</button>`;
                                         }
                                     });
                                     reactionPanel += '</div>';
@@ -382,7 +387,11 @@
                 if (isAdd) {
                     btn.innerHTML = `<span style="color: red;">${btn.innerText.split(" ")[0]}</span> ${parseInt(btn.innerText.split(" ")[1]) + 1}`;
                 } else {
-                    btn.innerHTML = `${btn.innerText.split(" ")[0]} ${parseInt(btn.innerText.split(" ")[1]) - 1}`;
+                    if ((parseInt(btn.innerText.split(" ")[1]) - 1) < 0){
+                        btn.innerHTML = `${btn.innerText.split(" ")[0]} ${parseInt(btn.innerText.split(" ")[1]) - 1}`;
+                    }else{
+                        btn.outerHTML = "";
+                    }
                 }
             });
         }
@@ -410,8 +419,12 @@
                                 reactionEmoji[reaction.reaction] = {
                                     data: reaction.reaction_data,
                                     name: reaction.reaction,
+                                    ismine: false,
                                     count: 0
                                 };
+                            }
+                            if (reaction.user_id == userID){
+                                reactionEmoji[reaction.reaction].ismine = true;
                             }
                             reactionEmoji[reaction.reaction].count += 1;
                         });
@@ -420,9 +433,9 @@
                             reactionPanel = '<div class="card-reactions">';
                             Object.values(reactionEmoji).forEach(reaction_data => {
                                 if (reaction_data.data.type == "custom") {
-                                    reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}"><img src="${reaction_data.data.image_url}" alt="${reaction_data.data.id}" class="reaction"></img> ${reaction_data.count}</button>`;
+                                    reactionPanel += `<button data-ismine="${reaction_data.ismine}" title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}"><img src="${reaction_data.data.image_url}" alt="${reaction_data.data.id}" class="reaction"></img> ${reaction_data.count}</button>`;
                                 } else {
-                                    reactionPanel += `<button title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}">${reaction_data.data.emoji} ${reaction_data.count}</button>`;
+                                    reactionPanel += `<button data-ismine="${reaction_data.ismine}" title="${reaction_data.name}" class="reaction-btn" data-letter-id="${letter.id}" data-reaction="${reaction_data.name}">${reaction_data.data.emoji} ${reaction_data.count}</button>`;
                                 }
                             });
                             reactionPanel += '</div>';
@@ -494,9 +507,9 @@
                 if (event.target.classList.contains('reaction-btn')) {
                     const letterId = event.target.getAttribute('data-letter-id');
                     const reaction = event.target.getAttribute('data-reaction');
-                    const isAdd = event.target.querySelector('span') === null;
+                    const isAdd = event.target.getAttribute("data-ismine") == "true";
 
-                    if (isAdd) {
+                    if (!isAdd) {
                         put_reaction(letterId, reaction);
                     } else {
                         delete_reaction(letterId, reaction);

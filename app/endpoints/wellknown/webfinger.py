@@ -1,7 +1,7 @@
 import re
+from typing import Optional
 
 from fastapi import APIRouter, Response
-from typing import Optional
 
 from ...data import DataHandler
 from ...services import UserService

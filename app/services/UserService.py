@@ -40,6 +40,10 @@ class UserService:
 
         if row["info"] is not None:
             row["info"] = json.loads(row["info"])
+        if row["following"] is not None:
+            row["following"] = json.loads(row["following"])
+        if row["followers"] is not None:
+            row["followers"] = json.loads(row["followers"])
         # Parse row into User object
         user = User.model_validate(row)
 
@@ -71,6 +75,10 @@ class UserService:
 
         if row["info"] is not None:
             row["info"] = json.loads(row["info"])
+        if row["following"] is not None:
+            row["following"] = json.loads(row["following"])
+        if row["followers"] is not None:
+            row["followers"] = json.loads(row["followers"])
         # Parse row into User object
         user = User.model_validate(row)
 

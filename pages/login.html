@@ -108,6 +108,7 @@
                     expires.setFullYear(expires.getFullYear() + 1);
 
                     document.cookie = `token=${data.token}; path=/; expires=${expires.toUTCString()}`;
+                    document.cookie = `userID=${data.user_id}; path=/; expires=${expires.toUTCString()}`;
                     window.location.href = '/timeline';
                 })
                 .catch(error => {

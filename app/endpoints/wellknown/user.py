@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
-from ...services import UserService
+
 from ...data import DataHandler
+from ...services import UserService
 
 router = APIRouter()
 

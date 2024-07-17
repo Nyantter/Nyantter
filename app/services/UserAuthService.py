@@ -51,5 +51,9 @@ class UserAuthService:
 
         if user["info"] is not None:
             user["info"] = json.loads(user["info"])
+        if user["following"] is not None:
+            user["following"] = json.loads(user["following"])
+        if user["followers"] is not None:
+            user["followers"] = json.loads(user["followers"])
 
         return AuthorizedUser.model_validate(dict(user))

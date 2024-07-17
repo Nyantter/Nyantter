@@ -4,7 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>レター</title>
+    <title>
+        {{ letter.user.display_name if letter.user.display_name else letter.user.handle }} (@{{ letter.user.handle }}) さん: 「{{letter.content.replace("\r", " ").replace("\n", " ")}}」 / {{ DataHandler.server.name }}
+    </title>    
+    <meta property="og:url" content="{{DataHandler.server.url}}/@{{letter.user.handle}}/letter/{{letter.id}}" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="{{ letter.user.display_name if letter.user.display_name else letter.user.handle }} (@{{ letter.user.handle }}) さんの投稿" />
+    <meta property="og:description" content="{{letter.content.replace("\r", " ").replace("\n", " ")}}" />
+    <meta property="og:site_name" content="{{DataHandler.server.name}}" />
+    <meta property="og:image" content="{{letter.user.icon_url}}" />
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -181,6 +189,7 @@
 
         // トークンが存在しない場合、投稿ボタンを隠す
         const token = getCookie('token');
+        const userID = getCookie('userID');
         let loggedIn = true;
         if (!token) {
             loggedIn = false;
@@ -253,6 +262,9 @@
                                     count: 0
                                 };
                             }
+                            if (reaction.user_id == userID){
+                                reactionEmoji[reaction.reaction].ismine = true;
+                            }
                             reactionEmoji[reaction.reaction]["count"] += 1;
                         });
 
@@ -276,7 +288,6 @@
                         }
                         
                         letter.content = letter.content.split('\r\n').join('<br>').split('\r').join('<br>').split('\n').join('<br>');
-                        document.title = `${letter.user.display_name ?? letter.user.handle} (@${letter.user.handle}) さんが投稿: ${letter.content}`;
 
                         const card = document.createElement('div');
                         card.className = 'card';
@@ -348,7 +359,11 @@
                 if (isAdd) {
                     btn.innerHTML = `<span style="color: red;">${btn.innerText.split(" ")[0]}</span> ${parseInt(btn.innerText.split(" ")[1]) + 1}`;
                 } else {
-                    btn.innerHTML = `${btn.innerText.split(" ")[0]} ${parseInt(btn.innerText.split(" ")[1]) - 1}`;
+                    if ((parseInt(btn.innerText.split(" ")[1]) - 1) < 0){
+                        btn.innerHTML = `${btn.innerText.split(" ")[0]} ${parseInt(btn.innerText.split(" ")[1]) - 1}`;
+                    }else{
+                        btn.outerHTML = "";
+                    }
                 }
             });
         }
@@ -385,7 +400,7 @@
                 if (event.target.classList.contains('reaction-btn')) {
                     const letterId = event.target.getAttribute('data-letter-id');
                     const reaction = event.target.getAttribute('data-reaction');
-                    const isAdd = event.target.querySelector('span') === null;
+                    const isAdd = event.target.getAttribute("data-ismine") == "true";
 
                     if (isAdd) {
                         put_reaction(letterId, reaction);

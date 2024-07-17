@@ -59,6 +59,8 @@ async def main():
                 header_url TEXT,
                 description VARCHAR(500),
                 info JSON,
+                following JSON DEFAULT '[]',
+                followers JSON DEFAULT '[]',
                 public_key TEXT NOT NULL,
                 private_key TEXT NOT NULL,
                 CONSTRAINT unique_user UNIQUE (handle, domain)
