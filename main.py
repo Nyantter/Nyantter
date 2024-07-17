@@ -18,6 +18,7 @@ from app.endpoints.api.letter.reaction.create import router as create_reaction_r
 from app.endpoints.api.letter.reaction.delete import router as delete_reaction_router
 from app.endpoints.api.timeline.local import router as local_router
 from app.endpoints.api.users.edit import router as edit_router
+from app.endpoints.api.users.follow import router as follow_router
 from app.endpoints.api.users.handle import router as handle_router
 from app.endpoints.api.users.me import router as me_router
 from app.endpoints.api.users.stat import router as stat_router
@@ -68,6 +69,7 @@ app.include_router(stat_router)
 app.include_router(handle_router)
 app.include_router(me_router)
 app.include_router(edit_router)
+app.include_router(follow_router)
 app.include_router(register_router)
 app.include_router(login_router)
 app.include_router(local_router)

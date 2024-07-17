@@ -22,9 +22,9 @@ router = APIRouter()
     response_class=JSONResponse,
     summary="ユーザーをフォローします。",
 )
-async def edit(
+async def follow(
     request: Request,
-    user_id: str,
+    handle: str,
     current_user: AuthorizedUser = Depends(UserAuthService.getUserFromBearerToken),
 ):
     """
@@ -32,6 +32,6 @@ async def edit(
     リクエストを送るたびにフォロー/アンフォローが切り替わります。
     """
 
-    target = await UserService.getUserFromID(user_id)
+    target = await UserService.getUser(handle, domain=None)
 
     return {"follow": await current_user.follow(target)}

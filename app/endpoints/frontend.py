@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from ..services import LetterService, UserService
 from ..data import DataHandler
+from ..services import LetterService, UserService
 
 router = APIRouter()
 templates = Jinja2Templates(directory="pages")
